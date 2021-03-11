@@ -1,3 +1,5 @@
+images-dir=./modules
+images=$(shell ls ${images-dir})
 libs-dir=./lib
 prereq-libs=
 # Exclude setup.py and prereq-libs
