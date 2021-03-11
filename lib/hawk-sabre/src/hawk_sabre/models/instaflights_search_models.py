@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from lib.flok_sabre.models.common import PageModel
+from lib.hawk_sabre.models.common import PageModel
 
 
 class InstaflightsSearchResponse(object):
