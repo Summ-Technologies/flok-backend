@@ -1,7 +1,7 @@
 summ-web<=0.1.0
 summ-logging<=0.1.0
-summ-sabre<=0.1.0
-summ-amadeus<=0.1.0
+flok-sabre<=0.1.0
+flok-amadeus<=0.1.0
 Flask # version managed by summ-web
 Flask-RESTful # version managed by summ-web
 Flask-SQLAlchemy # version managed by summ-web
