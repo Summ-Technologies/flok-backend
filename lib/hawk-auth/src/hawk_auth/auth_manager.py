@@ -43,10 +43,10 @@ class AuthManager(BaseManager):
             .filter(UserLoginProvider.unique_id == login_provider_uid)
             .one_or_none()
         )
-        login_data_serializer = get_login_data_serializer(
-            UserLoginProviderType[user_login_provider.provider]
-        )
         if user_login_provider is not None:
+            login_data_serializer = get_login_data_serializer(
+                UserLoginProviderType[user_login_provider.provider]
+            )
             if self._validate_login_data(
                 login_provider,
                 login_provider_data,
