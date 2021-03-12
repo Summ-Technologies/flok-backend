@@ -1,6 +1,6 @@
 from flask_restful import Api
 
-from .controllers import auth, hello
+from .controllers import auth, user
 
 V1_PREFIX = "/v1.0"
 
@@ -14,9 +14,9 @@ def route(path: str, version: str):
 
 
 def add_routes(api: Api):
-    # Hello
+    # Auth
     api.add_resource(auth.AuthSigninController, route_v1("/auth/signin"))
     api.add_resource(auth.AuthSignupController, route_v1("/auth/signup"))
 
-    api.add_resource(hello.HelloController, route_v1("/hello"))
-    api.add_resource(hello.HelloSecuredController, route_v1("/hello/secure"))
+    # User
+    api.add_resource(user.UserHomeController, route_v1("/user/home"))
