@@ -1,4 +1,4 @@
-from typing import Any, Dict, Literal
+from typing import Any, Dict
 
 from flask_restful import Resource
 from hawk_auth.auth_manager import AuthManager
