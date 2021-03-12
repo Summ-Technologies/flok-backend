@@ -1,0 +1,4 @@
+hawk-db
+summ-web
+summ-common
+bcrypt==3.2.0
