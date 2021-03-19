@@ -2,8 +2,10 @@ from typing import Any, Dict
 
 from flask_restful import Resource
 from hawk_auth.auth_manager import AuthManager
+from hawk_core.hawk_managers import CompanyManager, RetreatManager
 from hawk_models.auth import FlokLoginData, UserLoginProviderType
 from hawk_models.user import UserApiModelSchema
+from sqlalchemy import log
 from summ_web import responses
 from webargs import fields
 from webargs.flaskparser import use_args
@@ -11,6 +13,8 @@ from webargs.flaskparser import use_args
 from .. import app, db, jwt, web
 
 auth_manager = AuthManager(db.session, app.config)
+company_manager = CompanyManager(db.session, app.config)
+retreat_manager = RetreatManager(db.session, app.config)
 
 
 class AuthSigninController(Resource):
@@ -67,7 +71,21 @@ class AuthSignupController(Resource):
             last_name=args.get("last_name"),
         )
         user_login_id = auth_manager.user_login_id(new_user)
+
+        ### Auto creating company and retreat v1 upon signup for now.
+        company_name = None
+        if args.get("first_name"):
+            company_name = f"{args.get('first_name')}'s company"
+
+        new_company = company_manager.create_company(
+            name=company_name, admins=[new_user]
+        )
+        retreat_manager.create_retreat(
+            new_company,
+        )
         auth_manager.commit_changes()
+        ###
+
         return responses.success(
             {"user": UserApiModelSchema.dump(obj=new_user)},
             extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),

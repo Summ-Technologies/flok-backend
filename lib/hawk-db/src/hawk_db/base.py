@@ -1,6 +1,8 @@
 """
 Contains all base models and the Base object for all models to inherit.
 """
+from enum import Enum
+
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -14,3 +16,11 @@ naming_convention = {
 }
 metadata = MetaData(naming_convention=naming_convention)
 Base = declarative_base(metadata=metadata)
+
+
+class BaseEnum(Enum):
+    def __repr__(self) -> str:
+        return self.value
+
+    def __str__(self) -> str:
+        return self.__repr__()

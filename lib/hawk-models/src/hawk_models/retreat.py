@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict, List, Optional
 
 from hawk_db.retreat import RetreatItem, RetreatItemState, RetreatItemType
@@ -99,3 +100,13 @@ class RetreatItemApiModel(ApiModelABC):
 
 
 RetreatItemApiModelSchema = RetreatItemApiModel.Schema()
+
+TEMPLATES: Dict[str, List[str]] = {
+    "V1.0": [
+        "INTAKE_CALL-V1.0",
+        "EMPLOYEE_LOCATIONS-V1.0",
+        "INITIAL_PROPOSALS-V1.0",
+        "DESTINATION_SELECTION-V1.0",
+        "POST_PAYMENT-V1.0",
+    ]
+}

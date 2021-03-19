@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from enum import Enum
 
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -35,7 +34,7 @@ class Retreat(base.Base):
     )
 
 
-class RetreatItemType(Enum):
+class RetreatItemType(base.BaseEnum):
     INTAKE_CALL = "INTAKE_CALL"
     EMPLOYEE_LOCATIONS = "EMPLOYEE_LOCATIONS"
     INITIAL_PROPOSALS = "INITIAL_PROPOSALS"
@@ -49,13 +48,14 @@ class RetreatItem(base.Base):
     __tablename__ = "retreats_items"
 
     id = Column(Integer, primary_key=True)
+    uid = Column(String, unique=True)
     type = Column(pgEnum(RetreatItemType), nullable=False)
     data = Column(JSON, nullable=False)
     title = Column(String, nullable=False)
     subtitle = Column(String)
 
 
-class RetreatItemState(Enum):
+class RetreatItemState(base.BaseEnum):
     TODO = "TODO"
     DONE = "DONE"
     IN_PROGRESS = "IN_PROGRESS"
