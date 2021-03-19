@@ -23,7 +23,7 @@ class User(base.Base):
     )
 
     # Relationships
-    login_provider = relationship("UserLoginProvider")
+    login_providers = relationship("UserLoginProvider")
 
     def __repr__(self):
         return f"User(id={self.id},email={self.email},first_name={self.first_name},last_name={self.last_name})"
