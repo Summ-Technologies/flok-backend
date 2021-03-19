@@ -3,8 +3,6 @@ import logging
 from flask import g
 from flask_restful import Resource
 from hawk_core.hawk_managers import CompanyManager, RetreatManager, UserManager
-from hawk_db.company import CompanyAdmin
-from hawk_db.retreat import Retreat
 from hawk_models.company import CompanyApiModelSchema
 from hawk_models.retreat import RetreatApiModelSchema
 from hawk_models.user import UserApiModelSchema
