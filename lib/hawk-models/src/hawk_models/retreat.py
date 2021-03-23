@@ -1,8 +1,9 @@
-from enum import Enum
+from datetime import datetime
 from typing import Dict, List, Optional
 
 from hawk_db.retreat import RetreatItem, RetreatItemState, RetreatItemType
 from hawk_models.base import ApiModelABC, ObjectSchema
+from typing_extensions import TypedDict
 from webargs import fields
 
 
@@ -74,12 +75,14 @@ class RetreatItemApiModel(ApiModelABC):
     def __init__(
         self,
         id: int,
+        uid: str,
         type: RetreatItemType,
         data: Dict,
         title: str,
         subtitle: Optional[str] = None,
     ):
         self.id = id
+        self.uid = uid
         self.type = type
         self.data = data
         self.title = title
@@ -91,6 +94,7 @@ class RetreatItemApiModel(ApiModelABC):
             __model__ = cls
 
             id = fields.Int(required=True)
+            uid = fields.String(required=True)
             type = fields.Str(required=True)
             data = fields.Dict(required=True)
             title = fields.Str(required=True)
@@ -110,3 +114,175 @@ TEMPLATES: Dict[str, List[str]] = {
         "POST_PAYMENT-V1.0",
     ]
 }
+
+
+class MatchedSubstring(TypedDict):
+    offset: int
+    length: int
+
+
+class StructuredFormatting(ApiModelABC):
+    def __init__(
+        self,
+        main_text: str,
+        secondary_text: Optional[str] = None,
+        main_text_matched_substrings: Optional[MatchedSubstring] = None,
+    ):
+        self.main_text = main_text
+        self.main_text_matched_substrings = main_text_matched_substrings
+        self.secondary_text = secondary_text
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class StructuredFormattingSchema(ObjectSchema):
+            __model__ = cls
+            main_text = fields.String(required=True)
+            main_text_matched_substrings = fields.List(fields.Dict(), load_only=True)
+            secondary_text = fields.String(required=False)
+
+        return StructuredFormattingSchema()
+
+
+StructuredFormattingSchema = StructuredFormatting.Schema()
+
+
+class GooglePlaceModel(ApiModelABC):
+    def __init__(
+        self,
+        place_id: str,
+        reference: str,
+        description: str,
+        structured_formatting: StructuredFormatting,
+        terms: List[dict] = [],
+        types: List[str] = [],
+        matched_substrings: List[MatchedSubstring] = [],
+    ):
+        self.place_id = place_id
+        self.reference = reference
+        self.description = description
+        self.terms = terms
+        self.types = types
+        self.structured_formatting = structured_formatting
+        self.matched_substrings = matched_substrings
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class GooglePlaceModelSchema(ObjectSchema):
+            __model__ = cls
+            place_id = fields.String(required=True)
+            reference = fields.String(required=True)
+            description = fields.String(required=True)
+            terms = fields.List(fields.Dict())
+            types = fields.List(fields.String())
+            structured_formatting = fields.Nested(
+                "StructuredFormattingSchema", required=True
+            )
+            matched_substrings = fields.List(
+                fields.Dict(), load_only=True, required=False
+            )
+
+        return GooglePlaceModelSchema()
+
+
+GooglePlaceModelSchema = GooglePlaceModel.Schema()
+
+
+class RetreatEmployeeLocationModel(ApiModelABC):
+    def __init__(
+        self,
+        number: int,
+        location: GooglePlaceModel,
+    ):
+        self.number = number
+        self.location = location
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatEmployeeLocationModelSchema(ObjectSchema):
+            __model__ = cls
+
+            number = fields.Int(required=True)
+            location = fields.Nested("GooglePlaceModelSchema", required=True)
+
+        return RetreatEmployeeLocationModelSchema()
+
+
+RetreatEmployeeLocationModelSchema = RetreatEmployeeLocationModel.Schema()
+
+
+class RetreatToItemDataModel(ApiModelABC):
+    def __init__(
+        self,
+        locations: List[RetreatEmployeeLocationModel],
+        extra_info: Optional[str] = None,
+        version: str = "1.0",
+    ):
+        self.locations = locations
+        self.extra_info = extra_info
+        self.version = version
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatToItemDataModelSchema(ObjectSchema):
+            __model__ = cls
+
+            extra_info = fields.String(required=False)
+            locations = fields.Nested(
+                "RetreatEmployeeLocationModelSchema", many=True, required=True
+            )
+            version = fields.String(required=False)
+
+        return RetreatToItemDataModelSchema()
+
+
+RetreatEmployeeLocationModelSchema = RetreatEmployeeLocationModel.Schema()
+
+
+class RetreatEmployeeData(ApiModelABC):
+    def __init__(
+        self,
+        locations: List[RetreatEmployeeLocationModel],
+        timestamp: datetime,
+        extra_info: Optional[str] = None,
+        version: str = "1.0",
+    ):
+        self.locations = locations
+        if extra_info:
+            self.extra_info = extra_info
+        self.timestamp = timestamp
+        self.version = version
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatEmployeeDataSchema(ObjectSchema):
+            __model__ = cls
+            locations = fields.Nested(
+                "RetreatEmployeeLocationModelSchema", many=True, required=True
+            )
+            extra_info = fields.String(required=False)
+            version = fields.String(required=True)
+            timestamp = fields.AwareDateTime(required=True)
+
+        return RetreatEmployeeDataSchema()
+
+
+RetreatEmployeeDataSchema = RetreatEmployeeData.Schema()
+
+
+class RetreatEmployeeDataModel(ApiModelABC):
+    def __init__(self, submissions: List[RetreatEmployeeData] = []):
+        self.submissions = submissions
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatEmployeeDataModelSchema(ObjectSchema):
+            __model__ = cls
+
+            submissions = fields.Nested(
+                "RetreatEmployeeDataSchema", many=True, required=True
+            )
+
+        return RetreatEmployeeDataModelSchema()
+
+
+RetreatEmployeeDataModelSchema = RetreatEmployeeDataModel.Schema()

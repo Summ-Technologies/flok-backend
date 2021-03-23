@@ -1,4 +1,7 @@
+from typing import Optional
+
 from marshmallow import Schema, post_load
+from webargs import fields
 
 
 class ObjectSchema(Schema):

@@ -4,7 +4,12 @@ from typing import List, Optional
 from hawk_db.company import Company, CompanyAdmin, CompanyEmployee
 from hawk_db.retreat import Retreat, RetreatItem, RetreatItemState, RetreatToItem
 from hawk_db.user import User
-from hawk_models.retreat import TEMPLATES
+from hawk_models.retreat import (
+    TEMPLATES,
+    RetreatEmployeeData,
+    RetreatEmployeeDataModel,
+    RetreatEmployeeDataModelSchema,
+)
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base_manager import BaseManager
@@ -100,3 +105,59 @@ class RetreatManager(BaseManager):
             except NoResultFound:
                 raise HawkException(message=f"Missing retreat item with uid: {uid}")
         return new_retreat
+
+    def get_employee_location_saved_data(
+        self,
+        retreat_to_item: RetreatToItem,
+    ) -> RetreatEmployeeDataModel:
+
+        _saved = retreat_to_item.saved_data
+        if not _saved:
+            _saved = {"submissions": []}
+
+        saved_data: RetreatEmployeeDataModel = RetreatEmployeeDataModelSchema.load(
+            _saved
+        )
+        return saved_data
+
+    def update_employee_location_saved_data(
+        self,
+        retreat_to_item: RetreatToItem,
+        submission: RetreatEmployeeData,
+    ) -> RetreatToItem:
+        """
+        Add a new update to employed location.
+        The data is updated in the saved_data field of the RetreatToItem model
+        """
+        saved_data = self.get_employee_location_saved_data(retreat_to_item)
+        saved_data.submissions.append(submission)
+        retreat_to_item.saved_data = RetreatEmployeeDataModelSchema.dump(saved_data)
+        self.session.add(retreat_to_item)
+        self.session.flush()
+        return retreat_to_item
+
+    def advance_retreat_items(self, retreat: Retreat) -> Retreat:
+        in_progress_items = list(
+            filter(
+                lambda item: item.state == RetreatItemState.IN_PROGRESS,
+                retreat.retreat_items,
+            )
+        )
+        if in_progress_items:
+            in_progress_item = in_progress_items[0]
+            in_progress_item.state = RetreatItemState.DONE
+            self.session.add(in_progress_item)
+
+        todo_items = list(
+            filter(
+                lambda item: item.state
+                in [RetreatItemState.TODO, RetreatItemState.IN_PROGRESS],
+                retreat.retreat_items,
+            )
+        )
+        if todo_items:
+            todo_item = todo_items[0]
+            todo_item.state = RetreatItemState.IN_PROGRESS
+            self.session.add(todo_item)
+        self.session.flush()
+        return retreat
