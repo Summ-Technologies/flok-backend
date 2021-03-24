@@ -46,3 +46,21 @@ class UserLoginId(base.Base):
     created_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
     )
+
+
+class UserLoginToken(base.Base):
+    __tablename__ = "users_login_tokens"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # core data
+    login_token = Column(String, unique=True, default=lambda: str(hash(uuid4())))
+    is_active = Column(Boolean, nullable=False, default=True)
+
+    # relationship
+
+    # metadata
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
+    )

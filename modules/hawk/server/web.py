@@ -5,12 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 from summ_web.jwt_auth import JWTManager
 
 ### Exception error codes
-err_code_to_status_code = {
-    1001: 404,
-    1002: 422,
-    1003: 422,
-    1004: 401,
-}
+err_code_to_status_code = {1001: 404, 1002: 422, 1003: 422, 1004: 401, 1005: 404}
 
 
 def load_user_fn(session: Session):

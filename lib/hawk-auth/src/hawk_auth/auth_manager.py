@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 import bcrypt
-from hawk_db.auth import UserLoginId, UserLoginProvider
+from hawk_db.auth import UserLoginId, UserLoginProvider, UserLoginToken
 from hawk_db.user import User
 from hawk_models.auth import (
     FlokLoginData,
@@ -109,6 +109,47 @@ class AuthManager(BaseManager):
             return new_user
         else:
             raise HawkAuthException(1002)
+
+    def get_user_by_login_token(self, login_token: str) -> Optional[User]:
+        """Get user for login token"""
+        user_login_token = (
+            self.session.query(UserLoginToken)
+            .filter(UserLoginToken.login_token == login_token)
+            .one_or_none()
+        )
+        if user_login_token:
+            return self.session.query(User).get(user_login_token.user_id)
+
+    def signin_user_and_reset_password(
+        self,
+        user_login_token: str,
+        login_provider_data: FlokLoginData,
+        login_provider: UserLoginProviderType.FLOK = UserLoginProviderType.FLOK,
+    ) -> Optional[User]:
+        user = self.get_user_by_login_token(user_login_token)
+        if user:
+            login_provider_uid = user.email
+            user_login_provider: UserLoginProvider = (
+                self.session.query(UserLoginProvider)
+                .filter(UserLoginProvider.provider == login_provider.value)
+                .filter(UserLoginProvider.unique_id == login_provider_uid)
+                .one_or_none()
+            )
+            if user_login_provider is None:
+                user_login_provider = UserLoginProvider()
+                user_login_provider.unique_id = login_provider_uid
+                user_login_provider.user_id = user.id
+                user_login_provider.provider = login_provider
+            new_login_data = get_login_data_serializer(login_provider).dump(
+                obj=FlokLoginData(
+                    password=self._encrypt_pw(login_provider_data.password)
+                )
+            )
+            user_login_provider.data = new_login_data
+            self.session.add(user_login_provider)
+            self.session.flush()
+            return user
+        raise HawkAuthException(1005)
 
     def user_login_id(self, user: User) -> UserLoginId:
         """Returns UserLoginId record for user (creates one if doesn't exist)"""

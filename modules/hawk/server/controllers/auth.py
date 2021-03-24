@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from flask_restful import Resource
 from hawk_auth.auth_manager import AuthManager
+from hawk_auth.exceptions import HawkAuthException
 from hawk_core.hawk_managers import CompanyManager, RetreatManager
 from hawk_models.auth import FlokLoginData, UserLoginProviderType
 from hawk_models.user import UserApiModelSchema
@@ -52,12 +53,8 @@ class AuthSignupController(Resource):
             deserialize=lambda lp: UserLoginProviderType[lp],
             required=True,
         ),
-        "first_name": fields.String(
-            data_key="firstName",
-        ),
-        "last_name": fields.String(
-            data_key="lastName",
-        ),
+        "first_name": fields.String(data_key="firstName"),
+        "last_name": fields.String(data_key="lastName"),
     }
 
     @use_args(post_args, location="json")
@@ -88,5 +85,37 @@ class AuthSignupController(Resource):
 
         return responses.success(
             {"user": UserApiModelSchema.dump(obj=new_user)},
+            extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
+        )
+
+
+class AuthResetController(Resource):
+    get_args = {
+        "login_token": fields.String(required=True),
+    }
+
+    @use_args(get_args, location="querystring")
+    def get(self, args: Dict[str, any]):
+        user = auth_manager.get_user_by_login_token(login_token=args["login_token"])
+        if user:
+            return responses.success({"user": UserApiModelSchema.dump(obj=user)})
+        raise HawkAuthException(1005)
+
+    post_args = {
+        "password": fields.String(required=True),
+        "login_token": fields.String(required=True),
+    }
+
+    @use_args(post_args, location="json")
+    def post(self, args: Dict[str, Any]):
+        user = auth_manager.signin_user_and_reset_password(
+            user_login_token=args["login_token"],
+            login_provider_data=FlokLoginData(password=args["password"]),
+            login_provider=UserLoginProviderType.FLOK,
+        )
+        user_login_id = auth_manager.user_login_id(user)
+        auth_manager.commit_changes()
+        return responses.success(
+            {"user": UserApiModelSchema.dump(obj=user)},
             extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
         )
