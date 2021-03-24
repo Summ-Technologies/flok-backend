@@ -9,6 +9,7 @@ from hawk_models.auth import (
     UserLoginProviderType,
     get_login_data_serializer,
 )
+from sqlalchemy.sql.expression import desc
 
 from .base_manager import BaseManager
 from .exceptions import HawkAuthException
@@ -41,7 +42,8 @@ class AuthManager(BaseManager):
             self.session.query(UserLoginProvider)
             .filter(UserLoginProvider.provider == login_provider.value)
             .filter(UserLoginProvider.unique_id == login_provider_uid)
-            .one_or_none()
+            .order_by(desc(UserLoginProvider.created_at))
+            .first()
         )
         if user_login_provider is not None:
             login_data_serializer = get_login_data_serializer(
@@ -89,6 +91,7 @@ class AuthManager(BaseManager):
                 self.session.query(UserLoginProvider)
                 .filter(UserLoginProvider.provider == login_provider.value)
                 .filter(UserLoginProvider.unique_id == login_provider_uid)
+                .order_by(desc(UserLoginProvider.created_at))
             ).first()
             is None
         ):
@@ -129,23 +132,15 @@ class AuthManager(BaseManager):
         user = self.get_user_by_login_token(user_login_token)
         if user:
             login_provider_uid = user.email
-            user_login_provider: UserLoginProvider = (
-                self.session.query(UserLoginProvider)
-                .filter(UserLoginProvider.provider == login_provider.value)
-                .filter(UserLoginProvider.unique_id == login_provider_uid)
-                .one_or_none()
-            )
-            if user_login_provider is None:
-                user_login_provider = UserLoginProvider()
-                user_login_provider.unique_id = login_provider_uid
-                user_login_provider.user_id = user.id
-                user_login_provider.provider = login_provider
-            new_login_data = get_login_data_serializer(login_provider).dump(
+            user_login_provider = UserLoginProvider()
+            user_login_provider.unique_id = login_provider_uid
+            user_login_provider.user_id = user.id
+            user_login_provider.provider = login_provider.value
+            user_login_provider.data = get_login_data_serializer(login_provider).dump(
                 obj=FlokLoginData(
                     password=self._encrypt_pw(login_provider_data.password)
                 )
             )
-            user_login_provider.data = new_login_data
             self.session.add(user_login_provider)
             self.session.flush()
             return user

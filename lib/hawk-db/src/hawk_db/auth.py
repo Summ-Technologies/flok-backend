@@ -25,6 +25,12 @@ class UserLoginProvider(base.Base):
         JSON, nullable=True
     )  # have a feeling only will be needed for custom login (holding password hash)
 
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(tz=timezone.utc),
+        nullable=False,
+    )
+
     def __repr__(self):
         return f"UserLoginProvider(id={self.id},user_id={self.user_id},provider={self.provider},unique_id={self.unique_id})"
 
