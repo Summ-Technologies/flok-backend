@@ -5,7 +5,7 @@ from typing import Dict, List
 from flask import g
 from flask_restful import Resource
 from hawk_core.hawk_managers import CompanyManager, RetreatManager, UserManager
-from hawk_db.retreat import RetreatItemState, RetreatToItem
+from hawk_db.retreat import RetreatItemState, RetreatItemType, RetreatToItem
 from hawk_models.retreat import (
     RetreatApiModelSchema,
     RetreatEmployeeData,
@@ -87,7 +87,11 @@ class RetreatEmployeeLocationController(Resource):
                             extra_info=post_args.get("extra_info"),
                         ),
                     )
-                    if retreat_to_item.state == RetreatItemState.IN_PROGRESS:
+                    if (
+                        retreat_to_item.state == RetreatItemState.IN_PROGRESS
+                        and retreat_to_item.retreat_item.type
+                        == RetreatItemType.EMPLOYEE_LOCATIONS
+                    ):
                         retreat_manager.advance_retreat_items(retreat)
                     retreat_manager.commit_changes()
                     return responses.success(
