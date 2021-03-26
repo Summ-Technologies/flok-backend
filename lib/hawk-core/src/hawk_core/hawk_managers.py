@@ -2,13 +2,21 @@ import logging
 from typing import List, Optional
 
 from hawk_db.company import Company, CompanyAdmin, CompanyEmployee
-from hawk_db.retreat import Retreat, RetreatItem, RetreatItemState, RetreatToItem
+from hawk_db.retreat import (
+    Retreat,
+    RetreatEmployeeLocationItem,
+    RetreatEmployeeLocationSubmission,
+    RetreatItem,
+    RetreatItemState,
+    RetreatToItem,
+)
 from hawk_db.user import User
 from hawk_models.retreat import (
     TEMPLATES,
     RetreatEmployeeData,
     RetreatEmployeeDataModel,
     RetreatEmployeeDataModelSchema,
+    RetreatEmployeeLocationSubmissionModel,
 )
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -106,35 +114,31 @@ class RetreatManager(BaseManager):
                 raise HawkException(message=f"Missing retreat item with uid: {uid}")
         return new_retreat
 
-    def get_employee_location_saved_data(
-        self,
-        retreat_to_item: RetreatToItem,
-    ) -> RetreatEmployeeDataModel:
-
-        _saved = retreat_to_item.saved_data
-        if not _saved:
-            _saved = {"submissions": []}
-
-        saved_data: RetreatEmployeeDataModel = RetreatEmployeeDataModelSchema.load(
-            _saved
-        )
-        return saved_data
-
-    def update_employee_location_saved_data(
-        self,
-        retreat_to_item: RetreatToItem,
-        submission: RetreatEmployeeData,
-    ) -> RetreatToItem:
-        """
-        Add a new update to employed location.
-        The data is updated in the saved_data field of the RetreatToItem model
-        """
-        saved_data = self.get_employee_location_saved_data(retreat_to_item)
-        saved_data.submissions.append(submission)
-        retreat_to_item.saved_data = RetreatEmployeeDataModelSchema.dump(saved_data)
-        self.session.add(retreat_to_item)
+    def add_employee_location_submission(
+        self, retreat: Retreat, submission: RetreatEmployeeLocationSubmissionModel
+    ) -> RetreatEmployeeLocationSubmission:
+        """Add new employee location submission record"""
+        new_submission = RetreatEmployeeLocationSubmission()
+        new_submission.extra_info = submission.extra_info
+        new_submission.retreat_id = retreat.id
+        self.session.add(new_submission)
+        for location_item in submission.location_items:
+            new_location = RetreatEmployeeLocationItem()
+            new_location.employee_count = location_item.employee_count
+            new_location.google_place_id = location_item.google_place_id
+            new_location.main_text = location_item.main_text
+            new_location.secondary_text = location_item.secondary_text
+            new_submission.location_items.append(new_location)
         self.session.flush()
-        return retreat_to_item
+        return new_submission
+
+    def get_employee_location_submission(
+        self,
+        retreat: Retreat,
+    ) -> Optional[RetreatEmployeeLocationSubmission]:
+        """Gets latest employee location submission, if one exists"""
+        if retreat.employee_location_submissions:
+            return retreat.employee_location_submissions[0]
 
     def advance_retreat_items(self, retreat: Retreat) -> Retreat:
         in_progress_items = list(
@@ -161,3 +165,35 @@ class RetreatManager(BaseManager):
             self.session.add(todo_item)
         self.session.flush()
         return retreat
+
+    def get_employee_location_saved_data(
+        self,
+        retreat_to_item: RetreatToItem,
+    ) -> RetreatEmployeeDataModel:
+        """DEPRECATED in favor of add_employee_location_submission related changes"""
+
+        _saved = retreat_to_item.saved_data
+        if not _saved:
+            _saved = {"submissions": []}
+
+        saved_data: RetreatEmployeeDataModel = RetreatEmployeeDataModelSchema.load(
+            _saved
+        )
+        return saved_data
+
+    def update_employee_location_saved_data(
+        self,
+        retreat_to_item: RetreatToItem,
+        submission: RetreatEmployeeData,
+    ) -> RetreatToItem:
+        """
+        DEPRECATED in favor of add_employee_location_submission
+        Add a new update to employed location.
+        The data is updated in the saved_data field of the RetreatToItem model
+        """
+        saved_data = self.get_employee_location_saved_data(retreat_to_item)
+        saved_data.submissions.append(submission)
+        retreat_to_item.saved_data = RetreatEmployeeDataModelSchema.dump(saved_data)
+        self.session.add(retreat_to_item)
+        self.session.flush()
+        return retreat_to_item

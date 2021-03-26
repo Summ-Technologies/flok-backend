@@ -6,11 +6,7 @@ from flask import g
 from flask_restful import Resource
 from hawk_core.hawk_managers import CompanyManager, RetreatManager, UserManager
 from hawk_db.retreat import RetreatItemState, RetreatItemType, RetreatToItem
-from hawk_models.retreat import (
-    RetreatApiModelSchema,
-    RetreatEmployeeData,
-    RetreatEmployeeDataSchema,
-)
+from hawk_models.retreat import RetreatApiModelSchema, RetreatEmployeeData
 from pytz import timezone
 from summ_web import responses
 from webargs import fields
@@ -47,7 +43,43 @@ class RetreatController(Resource):
         )
 
 
+class RetreatEmployeeLocationV2Controller(Resource):
+    post_args = {"submission": fields.Nested("RetreatEmployeeLocationSubmissionSchema")}
+
+    @jwt.requires_auth
+    @use_args(post_args, location="json")
+    def post(self, post_args: Dict[str, any], id: int):
+        companies = company_manager.get_companies(g.user, is_admin=True)
+        if companies:
+            company = companies[0]
+            retreats = list(
+                filter(
+                    lambda _retreat: _retreat.id == id,
+                    retreat_manager.get_retreats(company),
+                )
+            )
+            if retreats:
+                retreat = retreats[0]
+                retreat_manager.add_employee_location_submission(
+                    retreat, post_args["submission"]
+                )
+                for item in retreat.retreat_items:
+                    if item.state == RetreatItemState.IN_PROGRESS:
+                        if item.retreat_item.type == RetreatItemType.EMPLOYEE_LOCATIONS:
+                            retreat_manager.advance_retreat_items(retreat)
+                retreat_manager.commit_changes()
+                return responses.success(
+                    {
+                        "retreat": RetreatApiModelSchema.dump(obj=retreat),
+                    }
+                )
+
+        return responses.error("Can't find retreat.", status_code=404, error_code=None)
+
+
 class RetreatEmployeeLocationController(Resource):
+    """Deprecated in favor of V2"""
+
     post_args = {
         "locations": fields.Nested(
             "RetreatEmployeeLocationModelSchema",

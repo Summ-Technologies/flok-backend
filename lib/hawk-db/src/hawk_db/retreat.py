@@ -32,6 +32,10 @@ class Retreat(base.Base):
         order_by="RetreatToItem.order",
         collection_class=ordering_list("order"),
     )
+    employee_location_submissions = relationship(
+        "RetreatEmployeeLocationSubmission",
+        order_by="desc(RetreatEmployeeLocationSubmission.created_at)",
+    )
 
 
 class RetreatItemType(base.BaseEnum):
@@ -79,3 +83,37 @@ class RetreatToItem(base.Base):
     state = Column(pgEnum(RetreatItemState), nullable=False)
     data = Column(JSON)  # overrides retreat item data
     saved_data = Column(JSON)  # overrides retreat item data
+
+
+class RetreatEmployeeLocationSubmission(base.Base):
+
+    __tablename__ = "retreats_employees_locations_submissions"
+
+    id = Column(Integer, primary_key=True)
+    retreat_id = Column(Integer, ForeignKey("retreats.id"))
+
+    extra_info = Column(String)  # extra info with the submission
+
+    location_items = relationship("RetreatEmployeeLocationItem", lazy="joined")
+
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
+    )
+
+
+class RetreatEmployeeLocationItem(base.Base):
+
+    __tablename__ = "retreats_employees_locations_items"
+
+    id = Column(Integer, primary_key=True)
+    submission_id = Column(
+        Integer,
+        ForeignKey("retreats_employees_locations_submissions.id"),
+        nullable=False,
+    )
+
+    employee_count = Column(Integer, nullable=False)
+
+    google_place_id = Column(String, nullable=False)
+    main_text = Column(String, nullable=False)
+    secondary_text = Column(String, nullable=False)

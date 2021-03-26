@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -14,11 +16,13 @@ class RetreatApiModel(ApiModelABC):
         company_id: int,
         name: Optional[str] = None,
         retreat_items: List[object] = [],
+        employee_location_submission: RetreatEmployeeLocationSubmissionModel = None,
     ):
         self.id = id
         self.company_id = company_id
         self.name = name
         self.retreat_items = retreat_items
+        self.employee_location_submissions = employee_location_submission
 
     @classmethod
     def Schema(cls) -> ObjectSchema:
@@ -29,6 +33,13 @@ class RetreatApiModel(ApiModelABC):
             company_id = fields.Int(required=True)
             name = fields.Str()
             retreat_items = fields.Nested("RetreatToItemApiModelSchema", many=True)
+            employee_location_submission = fields.Function(
+                serialize=lambda obj: RetreatEmployeeLocationSubmissionSchema.dump(
+                    obj=obj.employee_location_submissions[0]
+                )
+                if obj.employee_location_submissions
+                else None
+            )
 
         return RetreatApiModelSchema()
 
@@ -116,6 +127,78 @@ TEMPLATES: Dict[str, List[str]] = {
 }
 
 
+class RetreatEmployeeLocationItemModel(ApiModelABC):
+    def __init__(
+        self,
+        employee_count: int,
+        google_place_id: str,
+        main_text: str,
+        secondary_text: str,
+        id: int = None,
+        submission_id: int = None,
+    ):
+        self.id = id
+        self.submission_id = submission_id
+        self.employee_count = employee_count
+        self.google_place_id = google_place_id
+        self.main_text = main_text
+        self.secondary_text = secondary_text
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatEmployeeLocationItemModelSchema(ObjectSchema):
+            __model__ = cls
+
+            id = fields.Int(required=True, dump_only=True)
+            submission_id = fields.Int(required=True, dump_only=True)
+            employee_count = fields.Int(required=True)
+            google_place_id = fields.String(required=True)
+            main_text = fields.String(required=True)
+            secondary_text = fields.String(required=True)
+
+        return RetreatEmployeeLocationItemModelSchema()
+
+
+RetreatEmployeeLocationItemModelSchema = RetreatEmployeeLocationItemModel.Schema()
+
+
+class RetreatEmployeeLocationSubmissionModel(ApiModelABC):
+    def __init__(
+        self,
+        location_items: RetreatEmployeeLocationItemModel,
+        id: int = None,
+        retreat_id: int = None,
+        created_at: Optional[datetime] = None,
+        extra_info: Optional[str] = None,
+    ):
+        self.id = id
+        self.retreat_id = retreat_id
+        self.location_items = location_items
+        self.created_at = created_at
+        self.extra_info = extra_info
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatEmployeeLocationSubmissionSchema(ObjectSchema):
+            __model__ = cls
+
+            id = fields.Int(required=True, dump_only=True)
+            retreat_id = fields.Int(required=True, dump_only=True)
+            location_items = fields.Nested(
+                "RetreatEmployeeLocationItemModelSchema", many=True
+            )
+            created_at = fields.AwareDateTime()
+            extra_info = fields.String()
+
+        return RetreatEmployeeLocationSubmissionSchema()
+
+
+RetreatEmployeeLocationSubmissionSchema = (
+    RetreatEmployeeLocationSubmissionModel.Schema()
+)
+
+
+# DEPRECATED IN FAVOR OF NEW MODELS
 class MatchedSubstring(TypedDict):
     offset: int
     length: int
