@@ -40,6 +40,11 @@ class RetreatApiModel(ApiModelABC):
                 if obj.employee_location_submissions
                 else None
             )
+            initial_proposals = fields.Function(
+                serialize=lambda obj: RetreatInitialProposalModelSchema.dump(
+                    obj=obj.initial_proposals, many=True
+                )
+            )
 
         return RetreatApiModelSchema()
 
@@ -196,6 +201,74 @@ class RetreatEmployeeLocationSubmissionModel(ApiModelABC):
 RetreatEmployeeLocationSubmissionSchema = (
     RetreatEmployeeLocationSubmissionModel.Schema()
 )
+
+
+class RetreatInitialProposalModel(ApiModelABC):
+    def __init__(
+        self,
+        id: int,
+        retreat_id: int,
+        created_at: datetime,
+        image_url: str,
+        title: str,
+        body: str,
+        dates_range: str,
+        num_nights_estimate: str,
+        flight_time_avg: str,
+        weather_prediction: str,
+        lodging_estimate: str,
+        flights_estimate: str,
+        transportation_estimate: str = None,
+        misc_estimate: str = None,
+        total_estimate: str = None,
+        extra_info: str = None,
+    ):
+        self.id = id
+        self.retreat_id = retreat_id
+        self.created_at = created_at
+        self.image_url = image_url
+        self.title = title
+        self.body = body
+        self.dates_range = dates_range
+        self.num_nights_estimate = num_nights_estimate
+        self.flight_time_avg = flight_time_avg
+        self.weather_prediction = weather_prediction
+        self.lodging_estimate = lodging_estimate
+        self.flights_estimate = flights_estimate
+        self.transportation_estimate = transportation_estimate
+        self.misc_estimate = misc_estimate
+        self.total_estimate = total_estimate
+        self.extra_info = extra_info
+
+    @classmethod
+    def Schema(cls) -> ObjectSchema:
+        class RetreatInitialProposalModelSchema(ObjectSchema):
+            __model__ = cls
+
+            id = fields.Int(required=True, dump_only=True)
+            retreat_id = fields.Int(required=True, dump_only=True)
+            created_at = fields.AwareDateTime(required=True)
+
+            image_url = fields.URL(required=True)
+            title = fields.String(required=True)
+            body = fields.String(required=True)
+            dates_range = fields.String(required=True)
+            num_nights_estimate = fields.String(required=True)
+            flight_time_avg = fields.String(required=True)
+            weather_prediction = fields.String(required=True)
+
+            lodging_estimate = fields.String(required=True)
+            flights_estimate = fields.String(required=True)
+            transportation_estimate = fields.String()
+            misc_estimate = fields.String()
+            total_estimate = fields.String()
+
+            extra_info = fields.String()
+
+        return RetreatInitialProposalModelSchema()
+
+
+RetreatInitialProposalModelSchema = RetreatInitialProposalModel.Schema()
 
 
 # DEPRECATED IN FAVOR OF NEW MODELS

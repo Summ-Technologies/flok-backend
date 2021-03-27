@@ -36,6 +36,10 @@ class Retreat(base.Base):
         "RetreatEmployeeLocationSubmission",
         order_by="desc(RetreatEmployeeLocationSubmission.created_at)",
     )
+    initial_proposals = relationship(
+        "RetreatInitialProposal",
+        order_by="desc(RetreatInitialProposal.created_at)",
+    )
 
 
 class RetreatItemType(base.BaseEnum):
@@ -117,3 +121,35 @@ class RetreatEmployeeLocationItem(base.Base):
     google_place_id = Column(String, nullable=False)
     main_text = Column(String, nullable=False)
     secondary_text = Column(String, nullable=False)
+
+
+class RetreatInitialProposal(base.Base):
+
+    __tablename__ = "retreats_initial_proposals"
+
+    id = Column(Integer, primary_key=True)
+    retreat_id = Column(Integer, ForeignKey("retreats.id"))
+
+    image_url = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    body = Column(String, nullable=False)
+    dates_range = Column(String, nullable=False)
+    num_nights_estimate = Column(String, nullable=False)
+    flight_time_avg = Column(String, nullable=False)
+    weather_prediction = Column(String, nullable=False)
+
+    lodging_estimate = Column(String, nullable=False)
+    flights_estimate = Column(String, nullable=False)
+    transportation_estimate = Column(String)
+    misc_estimate = Column(String)
+    total_estimate = Column(String)
+
+    extra_info = Column(String)
+
+    # Metadata
+    name = Column(String)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(tz=timezone.utc),
+        nullable=False,
+    )
