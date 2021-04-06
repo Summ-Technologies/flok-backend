@@ -3,18 +3,12 @@ import os
 # CORS through summ-web
 CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS", "").split(",")
 
-# SQLALCHEMY
-SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
-
 # Stripe API Key
 STRIPE_API_KEY = os.environ["STRIPE_API_KEY"]
 STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
 
-# RMQ connection config
-RMQ_USER = os.environ["RMQ_USER"]
-RMQ_PASSWORD = os.environ["RMQ_PASSWORD"]
-RMQ_HOST = os.environ["RMQ_HOST"]
-RMQ_PORT = os.environ["RMQ_PORT"]
+# SQLALCHEMY
+SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
 
 # JWT Auth
 SECRET_KEY = os.environ.get("SECRET_KEY")
