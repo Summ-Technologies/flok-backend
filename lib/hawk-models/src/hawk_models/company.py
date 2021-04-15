@@ -1,23 +1,11 @@
-from typing import Optional
-
-from hawk_models.base import ApiModelABC, ObjectSchema
+from hawk_models.base import ObjectSchema
 from webargs import fields
 
 
-class CompanyApiModel(ApiModelABC):
-    def __init__(self, id: int, name: Optional[str] = None):
-        self.id = id
-        self.name = name
+class CompanyModelSchema(ObjectSchema):
 
-    @classmethod
-    def Schema(cls) -> ObjectSchema:
-        class CompanyApiModelSchema(ObjectSchema):
-            __model__ = cls
-
-            id = fields.Int(required=True)
-            name = fields.Str(required=False)
-
-        return CompanyApiModelSchema()
+    id = fields.Int(dump_only=True)
+    name = fields.Str()
 
 
-CompanyApiModelSchema = CompanyApiModel.Schema()
+CompanyApiSchema = CompanyModelSchema()

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 robin_manager: RobinManager = RobinManager(db.session, app.config)
 
 
-class PaymentController(Resource):
+class CheckoutSessionController(Resource):
     @jwt.requires_auth
     def post(self):
         stripe_customer = robin_manager.get_stripe_customer(g.user)

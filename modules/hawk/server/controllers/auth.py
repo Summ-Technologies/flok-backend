@@ -5,8 +5,7 @@ from hawk_auth.auth_manager import AuthManager
 from hawk_auth.exceptions import HawkAuthException
 from hawk_core.hawk_managers import CompanyManager, RetreatManager
 from hawk_models.auth import FlokLoginData, UserLoginProviderType
-from hawk_models.user import UserApiModelSchema
-from sqlalchemy import log
+from hawk_models.user import UserApiSchema
 from summ_web import responses
 from webargs import fields
 from webargs.flaskparser import use_args
@@ -39,7 +38,7 @@ class AuthSigninController(Resource):
         user_login_id = auth_manager.user_login_id(logged_in_user)
         auth_manager.commit_changes()
         return responses.success(
-            {"user": UserApiModelSchema.dump(obj=logged_in_user)},
+            {"user": UserApiSchema.dump(obj=logged_in_user)},
             extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
         )
 
@@ -84,7 +83,7 @@ class AuthSignupController(Resource):
         ###
 
         return responses.success(
-            {"user": UserApiModelSchema.dump(obj=new_user)},
+            {"user": UserApiSchema.dump(obj=new_user)},
             extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
         )
 
@@ -98,7 +97,7 @@ class AuthResetController(Resource):
     def get(self, args: Dict[str, any]):
         user = auth_manager.get_user_by_login_token(login_token=args["login_token"])
         if user:
-            return responses.success({"user": UserApiModelSchema.dump(obj=user)})
+            return responses.success({"user": UserApiSchema.dump(obj=user)})
         raise HawkAuthException(1005)
 
     post_args = {
@@ -116,6 +115,6 @@ class AuthResetController(Resource):
         user_login_id = auth_manager.user_login_id(user)
         auth_manager.commit_changes()
         return responses.success(
-            {"user": UserApiModelSchema.dump(obj=user)},
+            {"user": UserApiSchema.dump(obj=user)},
             extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
         )

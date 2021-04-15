@@ -27,8 +27,8 @@ def add_routes(api: Api):
     # User
     api.add_resource(user.UserHomeController, route_v1("/user/home"))
 
-    # Payment
-    api.add_resource(payment.PaymentController, route_v1("/user/payments"))
+    # # Payment
+    api.add_resource(payment.CheckoutSessionController, route_v1("/user/payments"))
 
     # Retreat
     api.add_resource(
@@ -40,6 +40,6 @@ def add_routes(api: Api):
         route_v1("/retreats/<int:id>/employees-locations"),
     )
     api.add_resource(
-        retreat.RetreatEmployeeLocationController,
-        route_v1("/retreats/<int:id>/<int:item_id>"),
-    )  # DEPRECATED in favor of /retreats/:id/employee-locations
+        retreat.RetreatProposalsController,
+        route_v1("/retreats/<int:id>/proposals"),
+    )

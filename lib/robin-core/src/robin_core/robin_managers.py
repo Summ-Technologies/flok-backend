@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 import stripe
-from hawk_db.payment import StripeCustomer, StripePaymentIntent
+from hawk_db.payment import StripeCustomer
 from hawk_db.user import User
 
 from .base_manager import BaseManager
@@ -12,12 +12,19 @@ logger = logging.getLogger(__name__)
 
 class RobinManager(BaseManager):
     def validate_config(self, config: dict):
+        """
+        Required config values:
+            STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, CLIENT_BASE_URL
+        """
         stripe_api_key = config.get("STRIPE_API_KEY")
         assert stripe_api_key is not None, "Missing STRIPE_API_KEY config"
         stripe.api_key = stripe_api_key
         assert (
             config.get("STRIPE_WEBHOOK_SECRET") is not None
         ), "Missing STRIPE_WEBHOOK_SECRET config"
+        assert (
+            config.get("CLIENT_BASE_URL") is not None
+        ), "Missing CLIENT_BASE_URL config"
 
     def create_stripe_customer(self, user: User) -> StripeCustomer:
         customer = stripe.Customer.create(email=user.email, metadata={"id": user.id})
@@ -36,35 +43,28 @@ class RobinManager(BaseManager):
             .one_or_none()
         )
 
-    def create_stripe_payment(
-        self, customer: StripeCustomer, amount: int, currency: str = "usd"
-    ) -> StripePaymentIntent:
-        payment_intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency=currency,
+    def create_stripe_checkout_session(self, customer: StripeCustomer):
+        checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             customer=customer.customer_id,
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "unit_amount": 2000,
+                        "product_data": {
+                            "name": "Stubborn Attachments",
+                            "images": ["https://i.imgur.com/EHyR2nP.png"],
+                        },
+                    },
+                    "quantity": 1,
+                },
+            ],
+            mode="payment",
+            success_url=self.config["CLIENT_BASE_URL"] + "?success=true",
+            cancel_url=self.config["CLIENT_BASE_URL"] + "?canceled=true",
         )
-        if payment_intent:
-            new_stripe_payment = StripePaymentIntent()
-            new_stripe_payment.amount = payment_intent.amount
-            new_stripe_payment.client_secret = payment_intent.client_secret
-            new_stripe_payment.currency = payment_intent.currency
-            new_stripe_payment.customer_id = customer.customer_id
-            new_stripe_payment.status = payment_intent.status.upper()
-            new_stripe_payment.id = payment_intent.id
-            self.session.add(new_stripe_payment)
-            self.session.flush()
-            return new_stripe_payment
+        pass
 
-    def get_stripe_payments(
-        self, customer: StripeCustomer
-    ) -> List[StripePaymentIntent]:
-        return (
-            self.session.query(StripePaymentIntent)
-            .filter(StripePaymentIntent.customer_id == customer.customer_id)
-            .all()
-        )
-
-    def get_stripe_payment(self, payment_id: str) -> Optional[StripePaymentIntent]:
-        return self.session.query(StripePaymentIntent).get(payment_id)
+    def create_stripe_checkout_session():
+        pass

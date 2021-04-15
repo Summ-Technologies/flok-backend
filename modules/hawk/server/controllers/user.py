@@ -3,9 +3,9 @@ import logging
 from flask import g
 from flask_restful import Resource
 from hawk_core.hawk_managers import CompanyManager, RetreatManager, UserManager
-from hawk_models.company import CompanyApiModelSchema
-from hawk_models.retreat import RetreatApiModelSchema
-from hawk_models.user import UserApiModelSchema
+from hawk_models.company import CompanyApiSchema
+from hawk_models.retreat import RetreatApiSchema
+from hawk_models.user import UserApiSchema
 from summ_web import responses
 
 from .. import app, db, jwt
@@ -20,17 +20,17 @@ user_manager = UserManager(db.session, app.config)
 class UserHomeController(Resource):
     @jwt.requires_auth
     def get(self):
-        response = {"user": UserApiModelSchema.dump(obj=g.user)}
+        response = {"user": UserApiSchema.dump(obj=g.user)}
 
         companies = company_manager.get_companies(g.user, is_admin=True)
 
         if companies:
             company = companies[0]
-            response.update({"company": CompanyApiModelSchema.dump(obj=company)})
+            response.update({"company": CompanyApiSchema.dump(obj=company)})
 
             retreats = retreat_manager.get_retreats(company)
             if retreats:
                 retreat = retreats[0]
-                response.update({"retreat": RetreatApiModelSchema.dump(obj=retreat)})
+                response.update({"retreat": RetreatApiSchema.dump(obj=retreat)})
 
         return responses.success(response)

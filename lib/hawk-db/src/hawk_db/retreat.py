@@ -5,7 +5,6 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import JSON
-from sqlalchemy.sql.sqltypes import Enum as pgEnum
 
 from . import base
 
@@ -17,8 +16,8 @@ class Retreat(base.Base):
 
     id = Column(Integer, primary_key=True)
 
-    name = Column(String, nullable=True)
-    data = Column(JSON, nullable=True)  # for storing misc data on retreat
+    name = Column(String)
+    data = Column(JSON)  # for storing misc data on retreat
 
     # Metadata
     created_at = Column(
@@ -27,66 +26,15 @@ class Retreat(base.Base):
 
     # Relationships
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
-    retreat_items = relationship(
-        "RetreatToItem",
-        order_by="RetreatToItem.order",
-        collection_class=ordering_list("order"),
-    )
+
     employee_location_submissions = relationship(
         "RetreatEmployeeLocationSubmission",
         order_by="desc(RetreatEmployeeLocationSubmission.created_at)",
     )
-    initial_proposals = relationship(
-        "RetreatInitialProposal",
-        order_by="desc(RetreatInitialProposal.created_at)",
+    proposals = relationship(
+        "RetreatProposal",
+        order_by="desc(RetreatProposal.created_at)",
     )
-
-
-class RetreatItemType(base.BaseEnum):
-    INTAKE_CALL = "INTAKE_CALL"
-    EMPLOYEE_LOCATIONS = "EMPLOYEE_LOCATIONS"
-    INITIAL_PROPOSALS = "INITIAL_PROPOSALS"
-    DESTINATION_SELECTION = "DESTINATION_SELECTION"
-    POST_PAYMENT = "POST_PAYMENT"
-
-
-class RetreatItem(base.Base):
-    """Retreat item table"""
-
-    __tablename__ = "retreats_items"
-
-    id = Column(Integer, primary_key=True)
-    uid = Column(String, unique=True)
-    type = Column(pgEnum(RetreatItemType), nullable=False)
-    data = Column(JSON, nullable=False)
-    title = Column(String, nullable=False)
-    subtitle = Column(String)
-
-
-class RetreatItemState(base.BaseEnum):
-    TODO = "TODO"
-    DONE = "DONE"
-    IN_PROGRESS = "IN_PROGRESS"
-
-
-class RetreatToItem(base.Base):
-    """
-    Retreat to retreat items table
-    Also contains order and current state information.
-    """
-
-    __tablename__ = "retreats_to_items"
-
-    # Relationship
-    retreat_id = Column(Integer, ForeignKey("retreats.id"), primary_key=True)
-    retreat_item_id = Column(Integer, ForeignKey("retreats_items.id"), primary_key=True)
-
-    retreat_item = relationship("RetreatItem", lazy="joined")
-
-    order = Column(Integer, nullable=False)
-    state = Column(pgEnum(RetreatItemState), nullable=False)
-    data = Column(JSON)  # overrides retreat item data
-    saved_data = Column(JSON)  # overrides retreat item data
 
 
 class RetreatEmployeeLocationSubmission(base.Base):
@@ -123,26 +71,22 @@ class RetreatEmployeeLocationItem(base.Base):
     secondary_text = Column(String, nullable=False)
 
 
-class RetreatInitialProposal(base.Base):
+class RetreatProposal(base.Base):
 
-    __tablename__ = "retreats_initial_proposals"
+    __tablename__ = "retreats_proposals"
 
     id = Column(Integer, primary_key=True)
     retreat_id = Column(Integer, ForeignKey("retreats.id"))
 
     image_url = Column(String, nullable=False)
     title = Column(String, nullable=False)
-    body = Column(String, nullable=False)
-    dates_range = Column(String, nullable=False)
-    num_nights_estimate = Column(String, nullable=False)
-    flight_time_avg = Column(String, nullable=False)
-    weather_prediction = Column(String, nullable=False)
+    body = Column(String)
 
-    lodging_estimate = Column(String, nullable=False)
-    flights_estimate = Column(String, nullable=False)
+    flight_time_avg = Column(String, nullable=False)
+    flights_estimate = Column(String, nullable=False)  # per person
+    lodging_estimate = Column(String, nullable=False)  # per night per person
+
     transportation_estimate = Column(String)
-    misc_estimate = Column(String)
-    total_estimate = Column(String)
 
     extra_info = Column(String)
 

@@ -1,27 +1,15 @@
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from hawk_db.company import Company, CompanyAdmin, CompanyEmployee
 from hawk_db.retreat import (
     Retreat,
     RetreatEmployeeLocationItem,
     RetreatEmployeeLocationSubmission,
-    RetreatItem,
-    RetreatItemState,
-    RetreatToItem,
 )
 from hawk_db.user import User
-from hawk_models.retreat import (
-    TEMPLATES,
-    RetreatEmployeeData,
-    RetreatEmployeeDataModel,
-    RetreatEmployeeDataModelSchema,
-    RetreatEmployeeLocationSubmissionModel,
-)
-from sqlalchemy.orm.exc import NoResultFound
 
 from .base_manager import BaseManager
-from .exceptions import HawkException
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +63,12 @@ class CompanyManager(BaseManager):
 
 
 class RetreatManager(BaseManager):
+    def get_retreat(self, id: int) -> Optional[Retreat]:
+        """
+        Returns retreat for given id, if exists.
+        """
+        return self.session.query(Retreat).get(id)
+
     def get_retreats(self, company: Company) -> List[Retreat]:
         """
         Return all retreats for company
@@ -83,9 +77,7 @@ class RetreatManager(BaseManager):
             self.session.query(Retreat).filter(Retreat.company_id == company.id).all()
         )
 
-    def create_retreat(
-        self, company: Company, name: Optional[str] = None, template: str = "V1.0"
-    ) -> Retreat:
+    def create_retreat(self, company: Company, name: Optional[str] = None) -> Retreat:
         """
         Create a new retreat
         """
@@ -95,39 +87,22 @@ class RetreatManager(BaseManager):
         new_retreat.name = name
         self.session.add(new_retreat)
         self.session.flush()
-        template_item_uids = TEMPLATES.get(template)
-        if not template_item_uids:
-            raise HawkException(message=f"Invalid retreat template id: {template}")
-        for order, uid in enumerate(template_item_uids):
-            try:
-                retreat_item = (
-                    self.session.query(RetreatItem).filter(RetreatItem.uid == uid).one()
-                )
-                retreat_to_item = RetreatToItem()
-                retreat_to_item.retreat_item_id = retreat_item.id
-                retreat_to_item.retreat_id = new_retreat.id
-                retreat_to_item.order = order
-                retreat_to_item.state = RetreatItemState.TODO
-                self.session.add(retreat_to_item)
-                self.session.flush()
-            except NoResultFound:
-                raise HawkException(message=f"Missing retreat item with uid: {uid}")
         return new_retreat
 
     def add_employee_location_submission(
-        self, retreat: Retreat, submission: RetreatEmployeeLocationSubmissionModel
+        self, retreat: Retreat, submission: Dict
     ) -> RetreatEmployeeLocationSubmission:
         """Add new employee location submission record"""
         new_submission = RetreatEmployeeLocationSubmission()
-        new_submission.extra_info = submission.extra_info
+        new_submission.extra_info = submission.get("extra_info")
         new_submission.retreat_id = retreat.id
         self.session.add(new_submission)
-        for location_item in submission.location_items:
+        for location_item in submission.get("location_items", []):
             new_location = RetreatEmployeeLocationItem()
-            new_location.employee_count = location_item.employee_count
-            new_location.google_place_id = location_item.google_place_id
-            new_location.main_text = location_item.main_text
-            new_location.secondary_text = location_item.secondary_text
+            new_location.employee_count = location_item["employee_count"]
+            new_location.google_place_id = location_item["google_place_id"]
+            new_location.main_text = location_item["main_text"]
+            new_location.secondary_text = location_item["secondary_text"]
             new_submission.location_items.append(new_location)
         self.session.flush()
         return new_submission
@@ -139,61 +114,3 @@ class RetreatManager(BaseManager):
         """Gets latest employee location submission, if one exists"""
         if retreat.employee_location_submissions:
             return retreat.employee_location_submissions[0]
-
-    def advance_retreat_items(self, retreat: Retreat) -> Retreat:
-        in_progress_items = list(
-            filter(
-                lambda item: item.state == RetreatItemState.IN_PROGRESS,
-                retreat.retreat_items,
-            )
-        )
-        if in_progress_items:
-            in_progress_item = in_progress_items[0]
-            in_progress_item.state = RetreatItemState.DONE
-            self.session.add(in_progress_item)
-
-        todo_items = list(
-            filter(
-                lambda item: item.state
-                in [RetreatItemState.TODO, RetreatItemState.IN_PROGRESS],
-                retreat.retreat_items,
-            )
-        )
-        if todo_items:
-            todo_item = todo_items[0]
-            todo_item.state = RetreatItemState.IN_PROGRESS
-            self.session.add(todo_item)
-        self.session.flush()
-        return retreat
-
-    def get_employee_location_saved_data(
-        self,
-        retreat_to_item: RetreatToItem,
-    ) -> RetreatEmployeeDataModel:
-        """DEPRECATED in favor of add_employee_location_submission related changes"""
-
-        _saved = retreat_to_item.saved_data
-        if not _saved:
-            _saved = {"submissions": []}
-
-        saved_data: RetreatEmployeeDataModel = RetreatEmployeeDataModelSchema.load(
-            _saved
-        )
-        return saved_data
-
-    def update_employee_location_saved_data(
-        self,
-        retreat_to_item: RetreatToItem,
-        submission: RetreatEmployeeData,
-    ) -> RetreatToItem:
-        """
-        DEPRECATED in favor of add_employee_location_submission
-        Add a new update to employed location.
-        The data is updated in the saved_data field of the RetreatToItem model
-        """
-        saved_data = self.get_employee_location_saved_data(retreat_to_item)
-        saved_data.submissions.append(submission)
-        retreat_to_item.saved_data = RetreatEmployeeDataModelSchema.dump(saved_data)
-        self.session.add(retreat_to_item)
-        self.session.flush()
-        return retreat_to_item

@@ -10,6 +10,9 @@ SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
 STRIPE_API_KEY = os.environ["STRIPE_API_KEY"]
 STRIPE_WEBHOOK_SECRET = os.environ["STRIPE_WEBHOOK_SECRET"]
 
+# base url of public client
+CLIENT_BASE_URL = os.environ["CLIENT_BASE_URL"]
+
 # RMQ connection config
 RMQ_USER = os.environ["RMQ_USER"]
 RMQ_PASSWORD = os.environ["RMQ_PASSWORD"]
