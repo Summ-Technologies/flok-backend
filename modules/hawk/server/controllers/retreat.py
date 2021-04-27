@@ -17,27 +17,6 @@ company_manager = CompanyManager(db.session, app.config)
 retreat_manager = RetreatManager(db.session, app.config)
 user_manager = UserManager(db.session, app.config)
 
-
-class RetreatController(Resource):
-    @jwt.requires_auth
-    def get(self, id: int):
-        companies = company_manager.get_companies(g.user, is_admin=True)
-        if companies:
-            company = companies[0]
-            retreats = list(
-                filter(
-                    lambda _retreat: _retreat.id == id,
-                    retreat_manager.get_retreats(company),
-                )
-            )
-            if retreats:
-                retreat = retreats[0]
-                return responses.success(
-                    {"retreat": RetreatApiSchema.dump(obj=retreat)}
-                )
-        return responses.error("Can't find retreat.", status_code=404, error_code=None)
-
-
 class RetreatProposalsController(Resource):
     @jwt.requires_auth
     def get(self, id: int):

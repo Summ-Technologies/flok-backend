@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from hawk_db.retreat import RetreatEmployeeLocationSubmission
-from hawk_models.base import ObjectSchema
 from marshmallow.schema import Schema
 from webargs import fields
 
@@ -40,10 +38,11 @@ class RetreatProposalModelSchema(Schema):
     image_url = fields.URL(required=True)
     title = fields.String(required=True)
     body = fields.String()
-    flight_time_avg = fields.String(required=True)
+    flight_time_avg = fields.Float(required=True)
 
-    lodging_estimate = fields.String(required=True)
-    flights_estimate = fields.String(required=True)
+    lodging_cost = fields.Integer(required=True)
+    flights_cost = fields.Integer(required=True)
+    other_cost = fields.Integer(required=True)
 
     extra_info = fields.String()
 

@@ -32,10 +32,6 @@ def add_routes(api: Api):
 
     # Retreat
     api.add_resource(
-        retreat.RetreatController,
-        route_v1("/retreats/<int:id>"),
-    )
-    api.add_resource(
         retreat.RetreatEmployeeLocationV2Controller,
         route_v1("/retreats/<int:id>/employees-locations"),
     )

@@ -1,10 +1,9 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import JSON
+from sqlalchemy.sql.sqltypes import JSON, Numeric
 
 from . import base
 
@@ -82,11 +81,10 @@ class RetreatProposal(base.Base):
     title = Column(String, nullable=False)
     body = Column(String)
 
-    flight_time_avg = Column(String, nullable=False)
-    flights_estimate = Column(String, nullable=False)  # per person
-    lodging_estimate = Column(String, nullable=False)  # per night per person
-
-    transportation_estimate = Column(String)
+    flight_time_avg = Column(Numeric(4, 2), nullable=False)
+    flights_cost = Column(Integer, nullable=False)  # per person
+    lodging_cost = Column(Integer, nullable=False)  # per night per person
+    other_cost = Column(Integer, nullable=False)  # per night per person
 
     extra_info = Column(String)
 
