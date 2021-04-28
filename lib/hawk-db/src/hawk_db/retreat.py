@@ -32,8 +32,12 @@ class Retreat(base.Base):
     )
     proposals = relationship(
         "RetreatProposal",
+        primaryjoin="Retreat.id == RetreatProposal.retreat_id",
         order_by="desc(RetreatProposal.created_at)",
     )
+    selected_proposal_id = Column(Integer, ForeignKey("retreats_proposals.id"))
+    num_employees = Column(Integer, default=10, nullable=False)
+    num_nights = Column(Integer, default=4, nullable=False)
 
 
 class RetreatEmployeeLocationSubmission(base.Base):

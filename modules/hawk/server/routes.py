@@ -33,9 +33,13 @@ def add_routes(api: Api):
     # Retreat
     api.add_resource(
         retreat.RetreatEmployeeLocationV2Controller,
-        route_v1("/retreats/<int:id>/employees-locations"),
+        route_v1("/retreats/<int:retreat_id>/employees-locations"),
     )
     api.add_resource(
-        retreat.RetreatProposalsController,
-        route_v1("/retreats/<int:id>/proposals"),
+        retreat.RetreatFilterDetailsController,
+        route_v1("/retreats/<int:retreat_id>/details"),
+    )
+    api.add_resource(
+        retreat.RetreatProposalSelectedController,
+        route_v1("/retreats/<int:retreat_id>/proposals/selected"),
     )

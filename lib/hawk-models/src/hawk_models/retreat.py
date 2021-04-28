@@ -67,6 +67,9 @@ class RetreatModelSchema(Schema):
             obj=obj.proposals, many=True
         )
     )
+    selected_proposal_id = fields.Int()
+    num_employees = fields.Int(required=True)
+    num_nights = fields.Int(required=True)
 
 
 RetreatApiSchema = RetreatModelSchema()

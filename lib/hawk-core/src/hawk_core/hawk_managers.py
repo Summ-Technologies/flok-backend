@@ -63,11 +63,25 @@ class CompanyManager(BaseManager):
 
 
 class RetreatManager(BaseManager):
-    def get_retreat(self, id: int) -> Optional[Retreat]:
+    def get_retreat(self, id: int, admin: User = None) -> Optional[Retreat]:
         """
         Returns retreat for given id, if exists.
         """
-        return self.session.query(Retreat).get(id)
+        retreat = self.session.query(Retreat).get(id)
+        if admin:
+            if self._is_retreat_admin(retreat, admin):
+                company_manager = CompanyManager(self.session, self.config)
+                companies = company_manager.get_companies(admin, is_admin=True)
+                if retreat.company_id in list(map(lambda c: c.id, companies)):
+                    return retreat
+        return retreat
+
+    def _is_retreat_admin(self, retreat: Retreat, admin: User) -> bool:
+        company_manager = CompanyManager(self.session, self.config)
+        companies = company_manager.get_companies(admin, is_admin=True)
+        if retreat.company_id in list(map(lambda c: c.id, companies)):
+            return True
+        return False
 
     def get_retreats(self, company: Company) -> List[Retreat]:
         """
@@ -114,3 +128,39 @@ class RetreatManager(BaseManager):
         """Gets latest employee location submission, if one exists"""
         if retreat.employee_location_submissions:
             return retreat.employee_location_submissions[0]
+        return None
+
+    def update_retreat_filter_details(
+        self, retreat: Retreat, num_employees: int, num_nights: Optional[int] = None
+    ) -> Optional[Retreat]:
+        """Save filter state, number of employees and nights for this retreat"""
+        retreat.num_employees = num_employees
+        if num_nights is not None:
+            retreat.num_nights = num_nights
+        self.session.add(retreat)
+        self.session.flush()
+        return retreat
+
+    def select_retreat_proposal(
+        self, retreat: Retreat, proposal_id: int
+    ) -> Optional[Retreat]:
+        """Save state, an admin has selected this proposal"""
+        if proposal_id in list(map(lambda p: p.id, retreat.proposals)):
+            retreat.selected_proposal_id = proposal_id
+            self.session.add(retreat)
+            self.session.flush()
+            return retreat
+        else:
+            logger.warning(
+                "Attempted to select retreat proposal %d, \
+                but didn't belong to this retreat %d.",
+                proposal_id,
+                retreat.id,
+            )
+
+    def unselect_retreat_proposal(self, retreat: Retreat) -> Optional[Retreat]:
+        """Save state, an admin has deselected a prefered proposal"""
+        retreat.selected_proposal_id = None
+        self.session.add(retreat)
+        self.session.flush()
+        return retreat
