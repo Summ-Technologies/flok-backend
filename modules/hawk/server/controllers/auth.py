@@ -42,6 +42,15 @@ class AuthSigninController(Resource):
             extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
         )
 
+    @jwt.requires_auth
+    def delete(self):
+        return responses.success(
+            {"message": "Successfully logged out"},
+            extra_headers={
+                "Set-Cookie": f"{jwt.jwt_cookie_name}=logged; Path=/; Expires=Mon, 01, Jan 2000, 00:00:00 GMT; HttpOnly"
+            },
+        )
+
 
 class AuthSignupController(Resource):
     post_args = {

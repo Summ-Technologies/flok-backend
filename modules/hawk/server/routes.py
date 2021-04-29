@@ -28,7 +28,10 @@ def add_routes(api: Api):
     api.add_resource(user.UserHomeController, route_v1("/user/home"))
 
     # # Payment
-    api.add_resource(payment.CheckoutSessionController, route_v1("/user/payments"))
+    api.add_resource(
+        payment.CheckoutRetreatController,
+        route_v1("/checkout/retreats"),
+    )
 
     # Retreat
     api.add_resource(

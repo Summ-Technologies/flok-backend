@@ -2,8 +2,9 @@ import logging
 from typing import List, Optional
 
 import stripe
-from hawk_db.payment import StripeCustomer
+from hawk_db.payment import CheckoutOrder, RetreatCheckoutOrder, StripeCustomer
 from hawk_db.user import User
+from sqlalchemy.sql.schema import MetaData
 
 from .base_manager import BaseManager
 
@@ -40,28 +41,58 @@ class RobinManager(BaseManager):
             .one_or_none()
         )
 
-    def create_stripe_checkout_session(self, customer: StripeCustomer):
-        checkout_session = stripe.checkout.Session.create(
+    def create_checkout_order(
+        self,
+        customer_id: str,
+        session_id: str,
+        amount: int,
+        currency: str,
+        metadata: dict,
+    ):
+        checkout = CheckoutOrder()
+        checkout.amount = amount
+        checkout.customer_id = customer_id
+        checkout.checkout_session_id = session_id
+        checkout.currency = currency
+        self.session.add(checkout)
+        self.session.flush()
+        if metadata and metadata.get("retreat_id"):
+            retreat_checkout = RetreatCheckoutOrder()
+            retreat_checkout.order_id = checkout.id
+            retreat_checkout.retreat_id = metadata.get("retreat_id")
+            self.session.add(retreat_checkout)
+            self.session.flush()
+        return checkout
+
+    def create_stripe_checkout_session(
+        self,
+        customer: StripeCustomer,
+        name: str,
+        image: str,
+        price: int,
+        quantity: int,
+        cancel_url: str,
+        success_url: str,
+        metadata: Optional[dict] = None,
+    ):
+        return stripe.checkout.Session.create(
             payment_method_types=["card"],
             customer=customer.customer_id,
+            metadata=metadata,
             line_items=[
                 {
                     "price_data": {
                         "currency": "usd",
-                        "unit_amount": 2000,
+                        "unit_amount": price,
                         "product_data": {
-                            "name": "Stubborn Attachments",
-                            "images": ["https://i.imgur.com/EHyR2nP.png"],
+                            "name": name,
+                            "images": [image],
                         },
                     },
-                    "quantity": 1,
+                    "quantity": quantity,
                 },
             ],
             mode="payment",
-            success_url=self.config["CLIENT_BASE_URL"] + "?success=true",
-            cancel_url=self.config["CLIENT_BASE_URL"] + "?canceled=true",
+            success_url=success_url,
+            cancel_url=cancel_url,
         )
-        pass
-
-    def create_stripe_checkout_session():
-        pass

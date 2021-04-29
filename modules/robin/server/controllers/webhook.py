@@ -33,15 +33,18 @@ class WebhookController(Resource):
             )
 
         event_dict = event.to_dict()
-        intent = event_dict["data"]["object"]
-        stripe_payment = robin_manager.get_stripe_payment(intent["id"])
-        if stripe_payment:
-            stripe_payment.currency = intent["currency"]
-            stripe_payment.client_secret = intent["client_secret"]
-            stripe_payment.customer_id = intent["customer"]
-            stripe_payment.status = intent["status"].lstrip("payment_intent.").upper()
-            stripe_payment.amount = intent["amount"]
-            robin_manager.session.add(stripe_payment)
-            robin_manager.commit_changes()
-
-        return responses.success("OK")
+        logger.debug(event_dict)
+        if event_dict["type"] == "checkout.session.completed":
+            session = event_dict["data"]["object"]
+            if session["payment_status"]:
+                checkout_order = robin_manager.create_checkout_order(
+                    session_id=session["id"],
+                    customer_id=session["customer"],
+                    amount=session["amount_total"],
+                    currency=session["currency"],
+                    metadata=session["metadata"],
+                )
+                if checkout_order:
+                    robin_manager.commit_changes()
+                    return responses.success("OK")
+        return responses.error("Not found", status_code=404, error_code=None)

@@ -24,12 +24,9 @@ class CheckoutOrder(base.Base):
 
     id = Column(Integer, primary_key=True)
     checkout_session_id = Column(String, nullable=False, unique=True)
-    data = Column(JSON, nullable=False, default={})
-    name = Column(String)
-    description = Column(String)
+    customer_id = Column(String, ForeignKey("stripe_customers.customer_id"))
     amount = Column(Integer, nullable=False)
     currency = Column(String, nullable=False)
-    paid = Column(Boolean, default=False, nullable=False)
 
 
 class StripeCustomer(base.Base):
