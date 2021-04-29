@@ -15,14 +15,11 @@ class RobinManager(BaseManager):
     def validate_config(self, config: dict):
         """
         Required config values:
-            STRIPE_API_KEY, CLIENT_BASE_URL
+            STRIPE_API_KEY
         """
         stripe_api_key = config.get("STRIPE_API_KEY")
         assert stripe_api_key is not None, "Missing STRIPE_API_KEY config"
         stripe.api_key = stripe_api_key
-        assert (
-            config.get("CLIENT_BASE_URL") is not None
-        ), "Missing CLIENT_BASE_URL config"
 
     def create_stripe_customer(self, user: User) -> StripeCustomer:
         customer = stripe.Customer.create(email=user.email, metadata={"id": user.id})
