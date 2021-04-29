@@ -35,7 +35,7 @@ class WebhookController(Resource):
         event_dict = event.to_dict()
         if event_dict["type"] == "checkout.session.completed":
             session = event_dict["data"]["object"]
-            if session["payment_status"]:
+            if session["payment_status"] == "paid":
                 checkout_order = robin_manager.create_checkout_order(
                     session_id=session["id"],
                     customer_id=session["customer"],
