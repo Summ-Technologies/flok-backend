@@ -20,7 +20,7 @@ def upgrade():
     op.add_column('retreats_proposals', sa.Column('flights_cost', sa.Integer(), nullable=False))
     op.add_column('retreats_proposals', sa.Column('lodging_cost', sa.Integer(), nullable=False))
     op.add_column('retreats_proposals', sa.Column('other_cost', sa.Integer(), nullable=False))
-    op.alter_column('retreats_proposals', 'flight_time_avg', type_=sa.Numeric(precision=4, scale=2)) #,  postgresql_using='flight_time_avg::integer')
+    op.alter_column('retreats_proposals', 'flight_time_avg', type_=sa.Numeric(precision=4, scale=2), postgresql_using='flight_time_avg::numeric(4,2)')
     op.drop_column('retreats_proposals', 'flights_estimate')
     op.drop_column('retreats_proposals', 'transportation_estimate')
     op.drop_column('retreats_proposals', 'lodging_estimate')
