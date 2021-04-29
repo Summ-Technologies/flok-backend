@@ -14,14 +14,11 @@ class RobinManager(BaseManager):
     def validate_config(self, config: dict):
         """
         Required config values:
-            STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET, CLIENT_BASE_URL
+            STRIPE_API_KEY, CLIENT_BASE_URL
         """
         stripe_api_key = config.get("STRIPE_API_KEY")
         assert stripe_api_key is not None, "Missing STRIPE_API_KEY config"
         stripe.api_key = stripe_api_key
-        assert (
-            config.get("STRIPE_WEBHOOK_SECRET") is not None
-        ), "Missing STRIPE_WEBHOOK_SECRET config"
         assert (
             config.get("CLIENT_BASE_URL") is not None
         ), "Missing CLIENT_BASE_URL config"
