@@ -18,6 +18,13 @@ class Retreat(base.Base):
     name = Column(String)
     data = Column(JSON)  # for storing misc data on retreat
 
+    # Retreat filter details
+    num_employees = Column(Integer, default=10, nullable=False)
+    num_nights = Column(Integer, default=4, nullable=False)
+
+    # Payments
+    payments = relationship("RetreatCheckoutOrder")
+
     # Metadata
     created_at = Column(
         DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
@@ -37,8 +44,6 @@ class Retreat(base.Base):
     )
     flok_note = Column(String)
     selected_proposal_id = Column(Integer, ForeignKey("retreats_proposals.id"))
-    num_employees = Column(Integer, default=10, nullable=False)
-    num_nights = Column(Integer, default=4, nullable=False)
 
 
 class RetreatEmployeeLocationSubmission(base.Base):

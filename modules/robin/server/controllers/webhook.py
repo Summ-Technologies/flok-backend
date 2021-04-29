@@ -33,7 +33,6 @@ class WebhookController(Resource):
             )
 
         event_dict = event.to_dict()
-        logger.debug(event_dict)
         if event_dict["type"] == "checkout.session.completed":
             session = event_dict["data"]["object"]
             if session["payment_status"]:

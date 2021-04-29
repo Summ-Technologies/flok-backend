@@ -29,6 +29,7 @@ class CheckoutRetreatController(Resource):
     @use_args(post_args, location="json")
     def post(self, post_args: Dict[str, any]):
         flok_fee = 12500  # $125
+        flok_line_item = "Flok fee (per employee)"
         retreat = retreat_manager.get_retreat(post_args["retreat_id"], g.user)
         if retreat:
             matches: List[RetreatProposal] = list(
@@ -42,7 +43,7 @@ class CheckoutRetreatController(Resource):
                 stripe_checkout_session = robin_manager.create_stripe_checkout_session(
                     customer=stripe_customer,
                     image=proposal.image_url,
-                    name="Flok fee (per employee)",
+                    name=flok_line_item,
                     price=flok_fee,
                     quantity=retreat.num_employees,
                     success_url=post_args["redirect_url"],
