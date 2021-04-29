@@ -39,23 +39,3 @@ class CompanyAdmin(base.Base):
     company_id = Column(Integer, ForeignKey("companies.id"), primary_key=True)
     admin = relationship("User")
     company = relationship("Company")
-
-
-class CompanyEmployee(base.Base):
-    """Company employee table"""
-
-    __tablename__ = "companies_employees"
-
-    id = Column(Integer, primary_key=True)
-
-    # Relationships
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-
-    # Employee data (if user_id is null)
-    name = Column(String, nullable=True)
-    email = Column(String, nullable=True)
-    location = Column(String, nullable=True)
-    city = Column(String, nullable=True)
-    state = Column(String, nullable=True)
-    country = Column(String, nullable=True)

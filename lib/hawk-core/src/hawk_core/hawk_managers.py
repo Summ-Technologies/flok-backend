@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional
 
-from hawk_db.company import Company, CompanyAdmin, CompanyEmployee
+from hawk_db.company import Company, CompanyAdmin
 from hawk_db.retreat import (
     Retreat,
     RetreatEmployeeLocationItem,
@@ -30,18 +30,14 @@ class CompanyManager(BaseManager):
                 .filter(CompanyAdmin.admin_id == user.id)
                 .all()
             )
+            return list(
+                map(
+                    lambda emp: self.session.query(Company).get(emp.company_id),
+                    employee_records,
+                )
+            )
         else:
-            employee_records = (
-                self.session.query(CompanyEmployee)
-                .filter(CompanyEmployee.user_id == user.id)
-                .all()
-            )
-        return list(
-            map(
-                lambda emp: self.session.query(Company).get(emp.company_id),
-                employee_records,
-            )
-        )
+            return []
 
     def create_company(
         self, name: Optional[str] = None, admins: List[User] = []

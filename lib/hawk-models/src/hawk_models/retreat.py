@@ -55,6 +55,11 @@ class RetreatModelSchema(Schema):
     id = fields.Int(dump_only=True)
     company_id = fields.Int(dump_only=True)
     name = fields.Str()
+
+    num_employees = fields.Int(required=True)
+    num_nights = fields.Int(required=True)
+    flok_note = fields.String()
+
     employee_location_submission = fields.Function(
         serialize=lambda obj: RetreatEmployeeLocationSubmissionApiSchema.dump(
             obj=obj.employee_location_submissions[0]
@@ -68,8 +73,6 @@ class RetreatModelSchema(Schema):
         )
     )
     selected_proposal_id = fields.Int()
-    num_employees = fields.Int(required=True)
-    num_nights = fields.Int(required=True)
     paid = fields.Function(serialize=lambda obj: len(obj.payments) != 0)
 
 
