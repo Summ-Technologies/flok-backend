@@ -3,9 +3,6 @@ summ-logging<=0.1.0
 hawk-models<=0.1.0
 hawk-auth<=0.1.0
 hawk-core<=0.1.0
-hawk-sabre<=0.1.0
-hawk-amadeus<=0.1.0
-robin-core<=0.1.0
 Flask # version managed by summ-web
 Flask-RESTful # version managed by summ-web
 Flask-SQLAlchemy # version managed by summ-web

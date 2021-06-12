@@ -14,7 +14,6 @@ from .. import app, db, jwt, web
 
 auth_manager = AuthManager(db.session, app.config)
 company_manager = CompanyManager(db.session, app.config)
-retreat_manager = RetreatManager(db.session, app.config)
 
 
 class AuthSigninController(Resource):
@@ -30,6 +29,7 @@ class AuthSigninController(Resource):
 
     @use_args(post_args, location="json")
     def post(self, args: Dict[str, Any]):
+        """POST Login"""
         logged_in_user = auth_manager.signin_user(
             login_provider=args["login_provider"],
             login_provider_uid=args["email"],
@@ -44,56 +44,12 @@ class AuthSigninController(Resource):
 
     @jwt.requires_auth
     def delete(self):
+        """Performs client side logout"""
         return responses.success(
             {"message": "Successfully logged out"},
             extra_headers={
                 "Set-Cookie": f"{jwt.jwt_cookie_name}=logged; Path=/; Expires=Mon, 01, Jan 2000, 00:00:00 GMT; HttpOnly"
             },
-        )
-
-
-class AuthSignupController(Resource):
-    post_args = {
-        "email": fields.Email(required=True),
-        "password": fields.String(required=True),
-        "login_provider": fields.Function(
-            data_key="loginProvider",
-            deserialize=lambda lp: UserLoginProviderType[lp],
-            required=True,
-        ),
-        "first_name": fields.String(data_key="firstName"),
-        "last_name": fields.String(data_key="lastName"),
-    }
-
-    @use_args(post_args, location="json")
-    def post(self, args: Dict[str, Any]):
-        new_user = auth_manager.signup_user(
-            args["email"],
-            login_provider=args["login_provider"],
-            login_provider_uid=args["email"],
-            login_provider_data=FlokLoginData(password=args["password"]),
-            first_name=args.get("first_name"),
-            last_name=args.get("last_name"),
-        )
-        user_login_id = auth_manager.user_login_id(new_user)
-
-        ### Auto creating company and retreat v1 upon signup for now.
-        company_name = None
-        if args.get("first_name"):
-            company_name = f"{args.get('first_name')}'s company"
-
-        new_company = company_manager.create_company(
-            name=company_name, admins=[new_user]
-        )
-        retreat_manager.create_retreat(
-            new_company,
-        )
-        auth_manager.commit_changes()
-        ###
-
-        return responses.success(
-            {"user": UserApiSchema.dump(obj=new_user)},
-            extra_headers=web.login_cookie_header(jwt, user_login_id.login_id),
         )
 
 
@@ -104,6 +60,7 @@ class AuthResetController(Resource):
 
     @use_args(get_args, location="querystring")
     def get(self, args: Dict[str, any]):
+        """Get user for given login_token"""
         user = auth_manager.get_user_by_login_token(login_token=args["login_token"])
         if user:
             return responses.success({"user": UserApiSchema.dump(obj=user)})
@@ -116,6 +73,7 @@ class AuthResetController(Resource):
 
     @use_args(post_args, location="json")
     def post(self, args: Dict[str, Any]):
+        """Update password for given login_token"""
         user = auth_manager.signin_user_and_reset_password(
             user_login_token=args["login_token"],
             login_provider_data=FlokLoginData(password=args["password"]),

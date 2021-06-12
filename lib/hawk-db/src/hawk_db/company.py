@@ -21,13 +21,6 @@ class Company(base.Base):
         DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
     )
 
-    admins = relationship(
-        "User",
-        secondary="companies_admins",
-        primaryjoin="User.id==CompanyAdmin.admin_id",
-        secondaryjoin="Company.id==CompanyAdmin.company_id",
-    )
-
 
 class CompanyAdmin(base.Base):
     """Company to company admin table"""
@@ -37,5 +30,3 @@ class CompanyAdmin(base.Base):
     # Relationships
     admin_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
     company_id = Column(Integer, ForeignKey("companies.id"), primary_key=True)
-    admin = relationship("User")
-    company = relationship("Company")
