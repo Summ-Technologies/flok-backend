@@ -3,7 +3,7 @@ from typing import Any, Dict
 from flask_restful import Resource
 from hawk_auth.auth_manager import AuthManager
 from hawk_auth.exceptions import HawkAuthException
-from hawk_core.hawk_managers import CompanyManager, RetreatManager
+from hawk_core.hawk_managers import CompanyManager
 from hawk_models.auth import FlokLoginData, UserLoginProviderType
 from hawk_models.user import UserApiSchema
 from summ_web import responses

@@ -1,6 +1,6 @@
 from flask_restful import Api
 
-from .controllers import auth, payment, retreat, user
+from .controllers import auth, user
 
 V1_PREFIX = "/v1."
 V2_PREFIX = "/v2."

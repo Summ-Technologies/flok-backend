@@ -1,1 +1,1 @@
-from .hawk_managers import CompanyManager, RetreatManager
+from .hawk_managers import CompanyManager
