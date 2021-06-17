@@ -1,7 +1,9 @@
 import logging
 from typing import Dict, List, Optional
 
+from hawk_db import retreat
 from hawk_db.company import Company, CompanyAdmin
+from hawk_db.retreat import Retreat
 from hawk_db.user import User
 
 from .base_manager import BaseManager
@@ -14,25 +16,23 @@ class UserManager(BaseManager):
 
 
 class CompanyManager(BaseManager):
-    def get_companies(self, user: User, is_admin: bool = False) -> List[Company]:
+    def get_company(self, user: User) -> Optional[Company]:
+        """Get company user is admin of
+        This method makes the assumption a user should only be the admin of one company
         """
-        Return all companies user is an employee of.
-        Optionally, if is_admin is set, only return companies user has admin access to.
-        """
-        if is_admin:
-            employee_records = (
-                self.session.query(CompanyAdmin)
-                .filter(CompanyAdmin.admin_id == user.id)
-                .all()
+        company_admins = (
+            self.session.query(CompanyAdmin)
+            .filter(CompanyAdmin.admin_id == user.id)
+            .all()
+        )
+        companies = list(
+            map(
+                lambda emp: self.session.query(Company).get(emp.company_id),
+                company_admins,
             )
-            return list(
-                map(
-                    lambda emp: self.session.query(Company).get(emp.company_id),
-                    employee_records,
-                )
-            )
-        else:
-            return []
+        )
+        if companies:
+            return companies[0]
 
     def create_company(
         self, name: Optional[str] = None, admins: List[User] = []
@@ -51,3 +51,15 @@ class CompanyManager(BaseManager):
         self.session.add(new_company)
         self.session.flush()
         return new_company
+
+    def create_employee(
+        self, first_name: str, last_name: str, email: Optional[str], city: Optional[str]
+    ):
+        pass
+
+
+class RetreatManager(BaseManager):
+    def get_retreats(self, company: Company) -> List[Retreat]:
+        return list(
+            self.session.query(Retreat).filter(Retreat.company_id == company.id).all()
+        )

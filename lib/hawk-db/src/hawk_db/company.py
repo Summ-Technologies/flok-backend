@@ -15,6 +15,8 @@ class Company(base.Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String, nullable=True)
+    employees = relationship("Employee")
+    retreats = relationship("Retreat")
 
     # Metadata
     created_at = Column(

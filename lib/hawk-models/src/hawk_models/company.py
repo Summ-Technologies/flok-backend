@@ -2,10 +2,9 @@ from hawk_models.base import ObjectSchema
 from webargs import fields
 
 
-class CompanyModelSchema(ObjectSchema):
+class CompanySchema(ObjectSchema):
 
     id = fields.Int(dump_only=True)
     name = fields.Str()
-
-
-CompanyApiSchema = CompanyModelSchema()
+    employees = fields.List(fields.Nested("EmployeeSchema"))
+    retreats = fields.List(fields.Nested("RetreatSchema"))

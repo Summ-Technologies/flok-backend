@@ -11,12 +11,15 @@ from . import base
 class FlightTrip(base.Base):
     __tablename__ = "flight_trips"
     id = Column(Integer, primary_key=True)
-    num_layovers = Column(Integer, nullable=False)  # 0 being non-stop
     travel_time = Column(Integer, nullable=False)  # in minutes
+
+    flight_legs = relationship("FlightLeg")
 
 
 class FlightLeg(base.Base):
     __tablename__ = "flight_legs"
+
+    id = Column(Integer, primary_key=True)
 
     flight_trip_id = Column(Integer, ForeignKey("flight_trips.id"), nullable=False)
     leg_order = Column(Integer, nullable=False)  # keeps order for legs in a flight trip
@@ -44,3 +47,10 @@ class EmployeeFlightTrip(base.Base):
     final_cost = Column(Integer, nullable=False)  # in cents
     status = Column(String, nullable=False)  # pending approval, pending booking, booked
     url = Column(String)
+
+    arrival_flight_trip = relationship(
+        "FlightTrip", foreign_keys=[arrival_flight_trip_id]
+    )
+    departure_flight_trip = relationship(
+        "FlightTrip", foreign_keys=[departure_flight_trip_id]
+    )
