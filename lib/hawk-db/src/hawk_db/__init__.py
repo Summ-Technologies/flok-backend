@@ -1,1 +1,1 @@
-from . import auth, base, company, employee, flight, retreat, user, email_logs
+from . import auth, base, company, email_log, employee, flight, retreat, user
