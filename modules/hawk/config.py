@@ -6,9 +6,6 @@ CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS", "").split(",")
 # SQLALCHEMY
 SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
 
-# Stripe API Key
-STRIPE_API_KEY = os.environ["STRIPE_API_KEY"]
-
 # base url of public client
 CLIENT_BASE_URL = os.environ["CLIENT_BASE_URL"]
 
