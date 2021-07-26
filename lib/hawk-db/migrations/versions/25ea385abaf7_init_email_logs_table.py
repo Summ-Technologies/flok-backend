@@ -1,8 +1,8 @@
-"""added flight receipts email logs table
+"""init email logs table
 
-Revision ID: 1824cd681d31
-Revises: 6f8d27d162eb
-Create Date: 2021-07-15 01:18:00.014449
+Revision ID: 25ea385abaf7
+Revises: baed3daf19ae
+Create Date: 2021-07-26 11:51:56.822955
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1824cd681d31'
-down_revision = None
+revision = '25ea385abaf7'
+down_revision = 'baed3daf19ae'
 branch_labels = None
 depends_on = None
 
