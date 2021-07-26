@@ -3,7 +3,6 @@ from typing import Any, Dict
 from flask_restful import Resource
 from hawk_auth.auth_manager import AuthManager
 from hawk_auth.exceptions import HawkAuthException
-from hawk_core.hawk_managers import CompanyManager
 from hawk_models.auth import FlokLoginData, UserLoginProviderType
 from hawk_models.user import UserSchema
 from summ_web import responses
@@ -13,7 +12,6 @@ from webargs.flaskparser import use_args
 from .. import app, db, jwt, web
 
 auth_manager = AuthManager(db.session, app.config)
-company_manager = CompanyManager(db.session, app.config)
 
 
 class AuthSigninController(Resource):
