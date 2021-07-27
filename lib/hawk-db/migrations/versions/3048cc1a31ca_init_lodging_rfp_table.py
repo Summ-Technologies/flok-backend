@@ -1,8 +1,8 @@
 """init lodging rfp table
 
-Revision ID: 4aab6d7e30c2
+Revision ID: 3048cc1a31ca
 Revises: 25ea385abaf7
-Create Date: 2021-07-27 02:20:33.537576
+Create Date: 2021-07-27 03:41:15.933576
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '4aab6d7e30c2'
+revision = '3048cc1a31ca'
 down_revision = '25ea385abaf7'
 branch_labels = None
 depends_on = None
@@ -27,8 +27,8 @@ def upgrade():
     sa.Column('number_nights', sa.Integer(), nullable=True),
     sa.Column('preferred_months', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('preferred_start_dow', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('start_date', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('end_date', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('start_date', sa.Date(), nullable=True),
+    sa.Column('end_date', sa.Date(), nullable=True),
     sa.CheckConstraint('(NOT flexible_dates) OR (flexible_dates AND number_nights IS NOT NULL)', name=op.f('ck_lodging_proposal_requests_flexible_num_nights_required')),
     sa.CheckConstraint('(NOT flexible_dates) OR (flexible_dates AND preferred_months IS NOT NULL)', name=op.f('ck_lodging_proposal_requests_flexible_months_required')),
     sa.CheckConstraint('(NOT flexible_dates) OR (flexible_dates AND preferred_start_dow IS NOT NULL)', name=op.f('ck_lodging_proposal_requests_flexible_dow_required')),

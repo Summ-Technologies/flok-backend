@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql.json import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.schema import CheckConstraint
-from sqlalchemy.sql.sqltypes import Boolean
+from sqlalchemy.sql.sqltypes import Boolean, Date
 
 from . import base
 
@@ -51,5 +51,5 @@ class LodgingProposalRequest(base.Base):
     preferred_start_dow = Column(JSONB)  # array of day's of week (strings)
 
     # Non-flexible dates data
-    start_date = Column(DateTime(timezone=True))
-    end_date = Column(DateTime(timezone=True))
+    start_date = Column(Date)
+    end_date = Column(Date)

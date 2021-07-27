@@ -21,50 +21,23 @@ lodging_manager: LodgingManager = LodgingManager(db.session, app.config)
 class LodgingProposalRequestPostSchema(Schema):
     number_attendees = fields.Integer(min=0, required=True, data_key="numberAttendees")
     meeting_spaces = fields.List(
-        fields.String(validate=lambda _type: _type in ["company", "breakout"]),
+        fields.String(),
         data_key="meetingSpaces",
         required=True,
     )
     occupancy_types = fields.List(
-        fields.String(validate=lambda _type: _type in ["singles", "doubles"]),
+        fields.String(),
         data_key="occupancyTypes",
         required=True,
     )
     flexible_dates = fields.Boolean(required=True, data_key="flexibleDates")
     number_nights = fields.Integer(data_key="numberNights")
     preferred_months = fields.List(
-        fields.String(
-            validate=lambda _mon: _mon
-            in [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dec",
-            ]
-        ),
+        fields.String(),
         data_key="preferredMonths",
     )
     preferred_start_dow = fields.List(
-        fields.String(
-            validate=lambda _dow: _dow
-            in [
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat",
-                "Sun",
-            ]
-        ),
+        fields.String(),
         data_key="preferredStartDow",
     )
     start_date = fields.Date(data_key="startDate")
