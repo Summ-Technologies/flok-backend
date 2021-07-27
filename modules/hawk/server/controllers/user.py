@@ -20,8 +20,6 @@ class UserHomeController(Resource):
 
         Returns JSON
           user: UserSchema
-          company: CompanySchema
-          retreat: RetreatSchema
         """
         ret = {"user": UserSchema().dump(obj=g.user)}
         return responses.success(ret)

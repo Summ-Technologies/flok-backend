@@ -1,6 +1,6 @@
 from flask_restful import Api
 
-from .controllers import auth, user
+from .controllers import auth, lodging, user
 
 V1_PREFIX = "/v1."
 V2_PREFIX = "/v2."
@@ -25,3 +25,6 @@ def add_routes(api: Api):
 
     # User
     api.add_resource(user.UserHomeController, route_v1("/user/home"))
+
+    # Lodging
+    api.add_resource(lodging.LodgingProposalRequestController, route_v1("/lodging/proposal-requests"))
