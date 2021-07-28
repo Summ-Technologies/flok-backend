@@ -16,3 +16,5 @@ RUN apt-get install -y libpq-dev python3-dev gcc \
 # Copy server code to the /app/ dir
 COPY ./config.py ./
 COPY ./server ./server
+
+ENV APP_CONFIG /app/config.py
