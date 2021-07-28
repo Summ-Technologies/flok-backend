@@ -35,15 +35,24 @@ class LodgingProposalRequest(base.Base):
             "(flexible_dates) OR (NOT flexible_dates AND end_date IS NOT NULL)",
             name="exact_end_date_required",
         ),
+        CheckConstraint(
+            "(number_attendees IS NOT NULL) OR ((number_attendees_range_lower IS NOT NULL) AND (number_attendees_range_upper IS NOT NULL))",
+            name="number_attendees_info_required",
+        ),
     )
 
     id = Column(Integer, primary_key=True)
 
     # Common data
-    number_attendees = Column(Integer, nullable=False)
+    email = Column(String, nullable=False)
     flexible_dates = Column(Boolean, nullable=False)
     occupancy_types = Column(JSONB)  # array of string values
     meeting_spaces = Column(JSONB)  # array of string values
+
+    # backend now supports either number of attendees OR a lower-upper bound range
+    number_attendees = Column(Integer)
+    number_attendees_range_lower = Column(Integer)
+    number_attendees_range_upper = Column(Integer)
 
     # Flexible dates data
     number_nights = Column(Integer)
