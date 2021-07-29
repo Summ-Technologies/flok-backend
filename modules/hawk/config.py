@@ -11,11 +11,12 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
 # base url of public client
 CLIENT_BASE_URL = os.environ["CLIENT_BASE_URL"]
 
+# [UNUSED]
 # RMQ connection config
-RMQ_USER = os.environ["RMQ_USER"]
-RMQ_PASSWORD = os.environ["RMQ_PASSWORD"]
-RMQ_HOST = os.environ["RMQ_HOST"]
-RMQ_PORT = os.environ["RMQ_PORT"]
+# RMQ_USER = os.environ["RMQ_USER"]
+# RMQ_PASSWORD = os.environ["RMQ_PASSWORD"]
+# RMQ_HOST = os.environ["RMQ_HOST"]
+# RMQ_PORT = os.environ["RMQ_PORT"]
 
 # JWT Auth
 SECRET_KEY = os.environ.get("SECRET_KEY")
