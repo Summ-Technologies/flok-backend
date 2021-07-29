@@ -23,7 +23,7 @@ target_metadata = base.Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', os.environ.get("SQLALCHEMY_DATABASE_URI"))
 assert SQLALCHEMY_DATABASE_URI is not None
 config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URI)
 
