@@ -21,9 +21,8 @@ lodging_manager: LodgingManager = LodgingManager(db.session, app.config)
 class LodgingProposalRequestPostSchema(Schema):
     email = fields.Email(required=True, data_key="email")
     number_attendees = fields.Integer(min=0, data_key="numberAttendees")
-    number_attendees_range = fields.Tuple(
-        (fields.Integer(min=0), fields.Integer(min=0)), data_key="numberAttendeesRange"
-    )
+    number_attendees_lower = fields.Integer(min=0, data_key="numberAttendeesLower")
+    number_attendees_upper = fields.Integer(min=0, data_key="numberAttendeesUpper")
     meeting_spaces = fields.List(
         fields.String(),
         data_key="meetingSpaces",
@@ -66,9 +65,9 @@ class LodgingProposalRequestPostSchema(Schema):
         else:
             if start_date == None or end_date == None:
                 raise ValidationError("Missing required fields for exact dates")
-        if (
-            data.get("number_attendees") == None
-            and data.get("number_attendees_range") == None
+        if data.get("number_attendees") == None and (
+            data.get("number_attendees_upper") == None
+            or data.get("number_attendees_lower") == None
         ):
             raise ValidationError(
                 "Missing number attendees, either range or exact number is required."
@@ -83,7 +82,8 @@ class LodgingProposalRequestController(Resource):
             email=post_data["email"],
             flexible_dates=post_data["flexible_dates"],
             number_attendees=post_data.get("number_attendees"),
-            number_attendees_range=post_data.get("number_attendees_range"),
+            number_attendees_upper=post_data.get("number_attendees_upper"),
+            number_attendees_lower=post_data.get("number_attendees_lower"),
             meeting_spaces=post_data.get("meeting_spaces"),
             occupancy_types=post_data.get("occupancy_types"),
             number_nights=post_data.get("number_nights"),
