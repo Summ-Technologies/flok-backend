@@ -43,6 +43,10 @@ class LodgingProposalRequest(base.Base):
 
     id = Column(Integer, primary_key=True)
 
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
+    )
+
     # Common data
     email = Column(String, nullable=False)
     flexible_dates = Column(Boolean, nullable=False)
