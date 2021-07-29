@@ -19,7 +19,8 @@ class LodgingManager(BaseManager):
         self,
         email: str,
         number_attendees: Optional[int],
-        number_attendees_range: Optional[Tuple[int, int]],
+        number_attendees_upper: Optional[int],
+        number_attendees_lower: Optional[int],
         flexible_dates: bool,
         occupancy_types: Optional[List],
         meeting_spaces: Optional[List],
@@ -32,12 +33,8 @@ class LodgingManager(BaseManager):
         new_request = LodgingProposalRequest()
         new_request.email = email
         new_request.number_attendees = number_attendees
-        new_request.number_attendees_range_lower = (
-            number_attendees_range[0] if number_attendees_range else None
-        )
-        new_request.number_attendees_range_upper = (
-            number_attendees_range[1] if number_attendees_range else None
-        )
+        new_request.number_attendees_range_lower = number_attendees_lower
+        new_request.number_attendees_range_upper = number_attendees_upper
         new_request.flexible_dates = flexible_dates
         new_request.occupancy_types = occupancy_types
         new_request.meeting_spaces = meeting_spaces
