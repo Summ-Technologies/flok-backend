@@ -4,7 +4,9 @@ import os
 CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS", "").split(",")
 
 # SQLALCHEMY
-SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
+)
 
 # base url of public client
 CLIENT_BASE_URL = os.environ["CLIENT_BASE_URL"]
