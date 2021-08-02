@@ -49,7 +49,7 @@ class LodgingProposalRequest(base.Base):
 
     # Common data
     email = Column(String, nullable=False)
-    company_name = Column(String, nullable=False)
+    company_name = Column(String)
     flexible_dates = Column(Boolean, nullable=False)
     occupancy_types = Column(JSONB)  # array of string values
     meeting_spaces = Column(JSONB)  # array of string values
