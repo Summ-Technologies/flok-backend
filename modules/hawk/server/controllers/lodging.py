@@ -20,7 +20,7 @@ lodging_manager: LodgingManager = LodgingManager(db.session, app.config)
 
 class LodgingProposalRequestPostSchema(Schema):
     email = fields.Email(required=True, data_key="email")
-    company_name = fields.Email(required=True, data_key="companyName")
+    company_name = fields.String(required=True, data_key="companyName")
     number_attendees = fields.Integer(min=0, data_key="numberAttendees")
     number_attendees_lower = fields.Integer(min=0, data_key="numberAttendeesLower")
     number_attendees_upper = fields.Integer(min=0, data_key="numberAttendeesUpper")
