@@ -16,6 +16,13 @@ jobs:
           TWINE_REPOSITORY_URL: "https://nexus.goflok.com/repository/pypi-internal/"
         with:
           entrypoint: /scripts/github-workflows/publish-python.sh
+      - name: Trigger Heroku deployment
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "flok-backend"
+          heroku_email: "jared@goflok.com"
+          dontautocreate: true
       - name: Build and publish docker image
         uses: docker://jaredhanson11/cicd-tools
         env:
