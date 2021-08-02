@@ -18,6 +18,7 @@ class LodgingManager(BaseManager):
     def create_lodging_proposal_request(
         self,
         email: str,
+        company_name: str,
         number_attendees: Optional[int],
         number_attendees_upper: Optional[int],
         number_attendees_lower: Optional[int],
@@ -32,6 +33,7 @@ class LodgingManager(BaseManager):
     ) -> LodgingProposalRequest:
         new_request = LodgingProposalRequest()
         new_request.email = email
+        new_request.company_name = company_name
         new_request.number_attendees = number_attendees
         new_request.number_attendees_range_lower = number_attendees_lower
         new_request.number_attendees_range_upper = number_attendees_upper

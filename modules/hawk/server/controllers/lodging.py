@@ -20,6 +20,7 @@ lodging_manager: LodgingManager = LodgingManager(db.session, app.config)
 
 class LodgingProposalRequestPostSchema(Schema):
     email = fields.Email(required=True, data_key="email")
+    company_name = fields.Email(required=True, data_key="companyName")
     number_attendees = fields.Integer(min=0, data_key="numberAttendees")
     number_attendees_lower = fields.Integer(min=0, data_key="numberAttendeesLower")
     number_attendees_upper = fields.Integer(min=0, data_key="numberAttendeesUpper")
@@ -80,6 +81,7 @@ class LodgingProposalRequestController(Resource):
         """Submit lodging proposal request form"""
         new_request = lodging_manager.create_lodging_proposal_request(
             email=post_data["email"],
+            company_name=post_data["company_name"],
             flexible_dates=post_data["flexible_dates"],
             number_attendees=post_data.get("number_attendees"),
             number_attendees_upper=post_data.get("number_attendees_upper"),
