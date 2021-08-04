@@ -70,3 +70,4 @@ class LodgingProposalRequest(base.Base):
 
     # Other data
     state = Column(String, default="intake")
+    flok_owner = Column(String)
