@@ -44,16 +44,16 @@ class LodgingProposalRequestPostSchema(Schema):
         fields.String(),
         data_key="preferredStartDow",
     )
-    start_date = fields.Date(data_key="startDate")
-    end_date = fields.Date(data_key="endDate")
+    exact_dates = fields.List(
+        fields.Tuple((fields.Date, fields.Date)), data_key="exactDates"
+    )
 
     @validates_schema
     def validate_fields(self, data, **kwargs):
         number_nights = data.get("number_nights")
         preferred_months = data.get("preferred_months")
         preferred_start_dow = data.get("preferred_start_dow")
-        start_date = data.get("start_date")
-        end_date = data.get("end_date")
+        exact_dates = data.get("exact_dates")
         if data["flexible_dates"]:
             if (
                 number_nights == None
@@ -64,7 +64,7 @@ class LodgingProposalRequestPostSchema(Schema):
                     "Missing required fields for flexible dates",
                 )
         else:
-            if start_date == None or end_date == None:
+            if not exact_dates:
                 raise ValidationError("Missing required fields for exact dates")
         if data.get("number_attendees") == None and (
             data.get("number_attendees_upper") == None
@@ -91,8 +91,7 @@ class LodgingProposalRequestController(Resource):
             number_nights=post_data.get("number_nights"),
             preferred_months=post_data.get("preferred_months"),
             preferred_start_dow=post_data.get("preferred_start_dow"),
-            end_date=post_data.get("end_date"),
-            start_date=post_data.get("start_date"),
+            exact_dates=post_data.get("exact_dates"),
         )
         if new_request:
             db.session.commit()

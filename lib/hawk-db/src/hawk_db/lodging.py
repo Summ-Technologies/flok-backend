@@ -28,14 +28,6 @@ class LodgingProposalRequest(base.Base):
             name="flexible_dow_required",
         ),
         CheckConstraint(
-            "(flexible_dates) OR (NOT flexible_dates AND start_date IS NOT NULL)",
-            name="exact_start_date_required",
-        ),
-        CheckConstraint(
-            "(flexible_dates) OR (NOT flexible_dates AND end_date IS NOT NULL)",
-            name="exact_end_date_required",
-        ),
-        CheckConstraint(
             "(number_attendees IS NOT NULL) OR ((number_attendees_range_lower IS NOT NULL) AND (number_attendees_range_upper IS NOT NULL))",
             name="number_attendees_info_required",
         ),
@@ -65,5 +57,6 @@ class LodgingProposalRequest(base.Base):
     preferred_start_dow = Column(JSONB)  # array of day's of week (strings)
 
     # Non-flexible dates data
-    start_date = Column(Date)
-    end_date = Column(Date)
+    start_date = Column(Date)  # DEPRECATED
+    end_date = Column(Date)  # DEPRECATED
+    exact_dates = Column(JSONB)
