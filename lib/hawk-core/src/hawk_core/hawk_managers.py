@@ -28,8 +28,7 @@ class LodgingManager(BaseManager):
         number_nights: Optional[int],
         preferred_months: Optional[List],
         preferred_start_dow: Optional[List],
-        start_date: Optional[Date],
-        end_date: Optional[Date],
+        exact_dates: Optional[List],
     ) -> LodgingProposalRequest:
         new_request = LodgingProposalRequest()
         new_request.email = email
@@ -43,8 +42,7 @@ class LodgingManager(BaseManager):
         new_request.number_nights = number_nights
         new_request.preferred_months = preferred_months
         new_request.preferred_start_dow = preferred_start_dow
-        new_request.start_date = start_date
-        new_request.end_date = end_date
+        new_request.exact_dates = exact_dates
         self.session.add(new_request)
         self.session.flush()
         return new_request
