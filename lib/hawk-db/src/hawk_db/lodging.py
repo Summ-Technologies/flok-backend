@@ -67,3 +67,6 @@ class LodgingProposalRequest(base.Base):
     # Non-flexible dates data
     start_date = Column(Date)
     end_date = Column(Date)
+
+    # Other data
+    state = Column(String, default="intake")
