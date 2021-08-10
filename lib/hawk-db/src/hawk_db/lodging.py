@@ -67,7 +67,7 @@ class LodgingProposalRequest(base.Base):
     end_date = Column(Date)
 
     # Other data
-    state = Column(String, default="intake")
+    state = Column(String, default="initial")
     flok_owner = Column(String)
 
     invoice_paid_at = Column(DateTime(timezone=True))
