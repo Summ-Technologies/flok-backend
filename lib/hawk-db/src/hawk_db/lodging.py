@@ -2,10 +2,8 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql.json import JSONB
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.schema import CheckConstraint
-from sqlalchemy.sql.sqltypes import Boolean, Date
+from sqlalchemy.sql.sqltypes import Boolean, Date, Numeric
 
 from . import base
 
@@ -71,3 +69,19 @@ class LodgingProposalRequest(base.Base):
     # Other data
     state = Column(String, default="intake")
     flok_owner = Column(String)
+
+    invoice_paid_at = Column(DateTime(timezone=True))
+    days_to_pay = Column(Integer)
+    amount_invoiced = Column(Numeric(12, 2))
+    employees_paid_for = Column(Integer)
+    final_start_date = Column(Date)
+    final_end_date = Column(Date)
+    final_location = Column(String)
+    final_num_attendees = Column(Integer)
+    hotel_name = Column(String)
+    hotel_commission = Column(Numeric(12, 2))
+    invoice_adjustment = Column(Numeric(12, 2))
+    total = Column(Numeric(12, 2))
+    gmv_estimate = Column(Numeric(12, 2))
+    hotel_contract_signed_date = Column(Date)
+    hotel_commision_received_date = Column(Date)
