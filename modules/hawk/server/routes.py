@@ -1,6 +1,6 @@
 from flask_restful import Api
 
-from .controllers import auth, lodging, user
+from .controllers import auth, calendly, lodging, user
 
 V1_PREFIX = "/v1."
 V2_PREFIX = "/v2."
@@ -27,4 +27,9 @@ def add_routes(api: Api):
     api.add_resource(user.UserHomeController, route_v1("/user/home"))
 
     # Lodging
-    api.add_resource(lodging.LodgingProposalRequestController, route_v1("/lodging/proposal-requests"))
+    api.add_resource(
+        lodging.LodgingProposalRequestController, route_v1("/lodging/proposal-requests")
+    )
+
+    # Calendly webhook
+    api.add_resource(calendly.CalendlyWebhookController, route_v1("/webhooks/calendly"))

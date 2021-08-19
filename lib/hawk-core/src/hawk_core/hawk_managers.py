@@ -48,3 +48,6 @@ class LodgingManager(BaseManager):
         self.session.add(new_request)
         self.session.flush()
         return new_request
+
+    def get_lodging_proposal_request(self, id: int):
+        return self.session.query(LodgingProposalRequest).get(id)
