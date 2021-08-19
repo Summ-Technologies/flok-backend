@@ -96,5 +96,5 @@ class LodgingProposalRequestController(Resource):
         )
         if new_request:
             db.session.commit()
-            return responses.success({"message": "Successfully created"}, 201)
+            return responses.success({"id": new_request.id}, 201)
         return responses.error("Unable to process request", 0, 500)

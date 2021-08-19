@@ -69,7 +69,11 @@ class LodgingProposalRequest(base.Base):
     # Other data
     state = Column(String, default="initial")
     flok_owner = Column(String)
+    intake_call_calendly_event = Column(
+        JSONB
+    )  # if calendly event booked, save event info here, see
 
+    # Sales sheet related data
     invoice_paid_at = Column(DateTime(timezone=True))
     days_to_pay = Column(Integer)
     amount_invoiced = Column(Numeric(12, 2))
