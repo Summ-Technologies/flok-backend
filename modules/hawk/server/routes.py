@@ -30,6 +30,9 @@ def add_routes(api: Api):
     api.add_resource(
         lodging.LodgingProposalRequestController, route_v1("/lodging/proposal-requests")
     )
+    api.add_resource(
+        lodging.RFPLiteResponseController, route_v1("/lodging/rfp-lite-responses")
+    )
 
     # Calendly webhook
     api.add_resource(calendly.CalendlyWebhookController, route_v1("/webhooks/calendly"))

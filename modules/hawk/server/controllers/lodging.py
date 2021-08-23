@@ -98,3 +98,28 @@ class LodgingProposalRequestController(Resource):
             db.session.commit()
             return responses.success({"id": new_request.id}, 201)
         return responses.error("Unable to process request", 0, 500)
+
+
+class RFPLiteResponseController(Resource):
+    post_args = {
+        "lodging_proposal_request_id": fields.Integer(
+            required=True, data_key="lodgingProposalRequestId"
+        ),
+        "hotel": fields.String(required=True),
+        "availability": fields.Boolean(required=True),
+        "dates": fields.String(required=False),
+    }
+
+    @use_args(post_args, location="json")
+    def post(self, post_args: dict):
+        """
+        Creates RFPLite response record.
+        """
+        lodging_manager.create_rfp_lite_response(
+            post_args["lodging_proposal_request_id"],
+            post_args["hotel"],
+            post_args["availability"],
+            post_args.get("dates"),
+        )
+        lodging_manager.commit_changes()
+        return responses.success({"message": "Successfully recorded response"}, 201)

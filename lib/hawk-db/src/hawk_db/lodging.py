@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql.json import JSONB
-from sqlalchemy.sql.schema import CheckConstraint
+from sqlalchemy.sql.schema import CheckConstraint, ForeignKey
 from sqlalchemy.sql.sqltypes import Boolean, Date, Numeric
 
 from . import base
@@ -89,3 +89,21 @@ class LodgingProposalRequest(base.Base):
     gmv_estimate = Column(Numeric(12, 2))
     hotel_contract_signed_date = Column(Date)
     hotel_commision_received_date = Column(Date)
+
+
+class RFPLiteResponse(base.Base):
+    __tablename__ = "rfp_lite_responses"
+
+    id = Column(Integer, primary_key=True)
+    lodging_proposal_request_id = Column(
+        Integer, ForeignKey("lodging_proposal_requests.id"), nullable=False
+    )
+
+    availability_response = Column(Boolean, nullable=False)
+    hotel_name = Column(String, nullable=False)
+
+    dates = Column(String)
+
+    created_at = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(tz=timezone.utc)
+    )
