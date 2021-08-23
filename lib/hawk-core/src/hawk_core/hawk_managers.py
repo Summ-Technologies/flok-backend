@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Tuple
 
-from hawk_db.lodging import LodgingProposalRequest
+from hawk_db.lodging import LodgingProposalRequest, RFPLiteResponse
 from marshmallow.fields import List
 from sqlalchemy.sql.sqltypes import Date
 
@@ -51,3 +51,19 @@ class LodgingManager(BaseManager):
 
     def get_lodging_proposal_request(self, id: int):
         return self.session.query(LodgingProposalRequest).get(id)
+
+    def create_rfp_lite_response(
+        self,
+        lodging_proposal_request_id: int,
+        hotel: str,
+        avail_response: bool,
+        dates: Optional[any] = None,
+    ) -> RFPLiteResponse:
+        new_rfp_lite_response = RFPLiteResponse()
+        new_rfp_lite_response.lodging_proposal_request_id = lodging_proposal_request_id
+        new_rfp_lite_response.hotel_name = hotel
+        new_rfp_lite_response.availability_response = avail_response
+        new_rfp_lite_response.dates = dates
+        self.session.add(new_rfp_lite_response)
+        self.session.flush()
+        return new_rfp_lite_response
