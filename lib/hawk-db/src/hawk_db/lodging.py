@@ -67,11 +67,14 @@ class LodgingProposalRequest(base.Base):
     end_date = Column(Date)
 
     # Other data
-    state = Column(String, default="initial")
-    flok_owner = Column(String)
+    state = Column(String, default="Signed Up")
+    flok_owner = Column(String, default="Sam")
     intake_call_calendly_event = Column(
         JSONB
     )  # if calendly event booked, save event info here, see
+    created_by_flok_admin = Column(
+        Boolean
+    )  # if TRUE the proposal request was uploaded by Flok admin
 
     # Sales sheet related data
     invoice_paid_at = Column(DateTime(timezone=True))
